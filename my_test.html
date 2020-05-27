@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="description" content="A sample photogrammetry dataset rendered with 3D Tiles.">
+    <meta name="cesium-sandcastle-labels" content="Showcases, 3D Tiles">
+    <title>Cesium Demo</title>
+    <!-- <script src="./jquery/jquery-2.1.4.min.js"></script> -->
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <!-- <script src="https://cdn.bootcss.com/webpack-cesium/1.37.0/webpack.cesium.js"></script> -->
+    <script type="text/javascript" src="../../../Build/CesiumUnminified/Cesium.js"></script>
+    <script type="module" src="../load-cesium-es6.js"></script>
+    <script src="https://cdn.jsdelivr.net/hls.js/latest/hls.min.js"></script>
+    <!-- <script src="../../plugins/ysCesium/ysCesium.js"></script> -->
+    <!-- <link rel="stylesheet" href="./my.css"> -->
+    <style>
+        #yk-contain {
+        position: absolute;
+        right: 10px;
+        bottom: 210px;
+        width: 50px;
+        height: 50px;
+        transform: rotate(-90deg);
+        z-index: 99999;
+        }
+
+        .blooming-menu__item-btn-wrapper {
+        background-color: #fff!important;
+        transform: rotate(90deg);
+        }
+
+        .blooming-menu__main {
+        background-color: #0d94ff!important;
+        }
+
+        .blooming-menu__item:nth-of-type(4) .blooming-menu__item-btn {
+        background-image: url(./menu/img/main_view.svg);
+        background-size: 35%;
+        }
+
+        .blooming-menu__item:nth-of-type(1) .blooming-menu__item-btn {
+        background-image: url(./menu/img/line.svg);
+        }
+
+        .blooming-menu__item:nth-of-type(2) .blooming-menu__item-btn {
+        background-image: url(./menu/img/alarm.svg);
+        }
+
+        .blooming-menu__item:nth-of-type(3) .blooming-menu__item-btn {
+        background-image: url(./menu/img/electric.svg);
+        background-size: 35%;
+        }
+
+        .blooming-menu__item-btn:hover {
+        box-shadow: 0 8px 17px 0 rgba(0,0,0,.2);
+        opacity: 1;
+        }
+
+        #yk-button {
+            position: absolute;
+            right: 0px;
+            bottom: 310px;
+            width: 70px;
+            height: 70px;
+            z-index: 99999;
+            background-image: url('../../SampleData/ChangHua/image/home.png');
+            background-size: contain;
+        }
+
+        /* #ztpdj-button{
+            position: absolute;
+            right: 0px;
+            bottom: 100px;
+            width: 70px;
+            height: 70px;
+            background-image: url('../../SampleData/ChangHua/image/home.png');
+            z-index: 99999;
+            background-size: contain;
+        }
+
+        #boxpdj-button{
+            position: absolute;
+            right: 0px;
+            bottom: 0px;
+            width: 70px;
+            height: 70px;
+            background-image: url('../../SampleData/ChangHua/image/home.png');
+            z-index: 99999;
+            background-size: contain;
+        } */
+
+    </style>
+</head>
+
+<body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html">
+    <style>
+        @import url(../templates/bucket.css);
+    </style>
+    <div id='yk-contain'>
+        
+    </div>
+    <div id='yk-button' onclick="homeclick()"></div>
+    <!-- <div id='ztpdj-button' onclick="watchZTpdjStruct()"></div>
+    <div id='boxpdj-button' onclick="watchBoxpdjStruct()"></div> -->
+
+    <!-- <div class="ys-absolute-container" id="map" style="overflow: hidden"></div> -->
+    <!-- <div style="width: 80px;height: 30px;background-color: rgba(0, 0, 0, 0);position:relative;z-index: 99;left: 200px;top: 20px;" onclick="aaa()"></div> -->
+     <!-- <div style="width: 80px;height: 30px;background-color: rgba(0, 0, 0, 0);position:relative;z-index: 99;left: 20px;top: 20px;" ></div> -->
+     <!-- <div style="width: 150px;height: 100px;background-color: rgba(150, 140, 140, 0.63);position:relative;z-index: 99;left: 100px;top: 100px;" ></div> -->
+    <!-- <div style="width: 100px;height: 100px;background-color: red;position:relative;z-index: 99;right: 100px;top: 100px;" id="llll">aaaaaa</div> -->
+    <div id="cesiumContainer" class="fullSize"></div>
+    <div id="loadingOverlay" style="background-color: rgba(0,3,13,0.8);">
+        <div id="loadMain">
+            <h1>昌华工业园</h1>
+            <div id="facebook">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </div>
+    </div>
+    <div id="toolbar"></div>
+
+    <script id="cesium_sandcastle_script">
+        var buildSelect = false
+
+        function startup(Cesium) {
+            'use strict';
+            //这将使您的应用可以访问您在铯离子中的所有资产。
+            Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyMmQ0M2U0Zi1iOGJmLTQ2OTMtYTA3Ny1lMDkyNmIwZTI2NzYiLCJpZCI6MjcxMTMsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1ODg5MDY5OTZ9.bUrETUgwnJ1rsOLSJryPUPF8KFDrjS1xaF61-VnqYS4';
+            //Sandcastle_Begin
+            var viewer = new Cesium.Viewer('cesiumContainer', {
+                terrainProvider: Cesium.createWorldTerrain(),
+                selectionIndicator : false,
+                infoBox: false,
+                geocoder: false,
+                homeButton: false,
+                sceneModePicker: false,
+                baseLayerPicker: false,
+                navigationHelpButton: false,
+                timeline: false,
+                fullscreenButton: false,
+                vrButton: false,
+                animation: false,
+                shouldAnimate:true,
+                //clockViewModel:new Cesium.ClockViewModel(new Cesium.Clock({startTime : Cesium.JulianDate.fromIso8601("2013-12-25"),currentTime : Cesium.JulianDate.fromIso8601("2013-12-25")}))
+            });
+            //隐藏版权控件
+            viewer._cesiumWidget._creditContainer.style.display = "none";
+            // viewer.scene.globe.show = false //隐藏地球
+
+            //引入3D tiles文件
+            var tileset = new Cesium.Cesium3DTileset({
+                url: '../../SampleData/Cesium3DTiles/Classification/my_test/tileset.json',
+            });
+            //放置到场景中
+            viewer.scene.primitives.add(tileset);
+
+            //瓦片样式
+            tileset.style = new Cesium.Cesium3DTileStyle({
+                color: 'color("white",1)',
+                //show: '${Height} > 0',
+            })
+           
+            //加载完毕
+            tileset.allTilesLoaded.addEventListener(function() {
+                var param = {type:'loadEnd',}
+                setTimeout(() => {
+                    window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param))
+                }, 3000);
+                //tilesLoaded=true
+            });
+
+            //加载失败
+            tileset.tileFailed.addEventListener(function(error) {
+            alert('loadFailed');
+            console.log('An error occurred loading tile: ' + error.url);
+            console.log('Error: ' + error.message);
+            var param = {type:'loadFailed',}
+            window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param))
+            });
+
+            viewer.zoomTo(tileset);
+            Sandcastle.finishedLoading();   //拖拽？
+            
+             //移动设备上禁掉以下几个选项，可以相对更加流畅
+            if (navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i)) {
+            viewer.scene.fog.enable = false;
+            // viewer.scene.skyAtmosphere.show = false;
+            viewer.scene.fxaa = false;
+            }
+            //显示帧率
+            viewer.scene.debugShowFramesPerSecond = false;
+            document.addEventListener('keydown', function (event) {
+            var e = event || window.event || arguments.callee.caller.arguments[0];
+            if (e) {
+                switch (e.keyCode) {
+                    case 82: //R键查看地形三角网
+                        // if (viewer.cesiumInspector) {
+                        //     viewer.cesiumInspector.viewModel.wireframe = !viewer.cesiumInspector.viewModel.wireframe;
+                        // }
+                        break;
+                    case 70: //F键查看帧率
+                        viewer.scene.debugShowFramesPerSecond = !viewer.scene.debugShowFramesPerSecond;
+                        break;
+                    default:
+                }
+            }
+        });
+
+            //min 变焦时相机位置的最小大小（以米为单位）。默认为1.0。
+            viewer.scene.screenSpaceCameraController.minimumZoomDistance = 10;//相机的高度的最小值
+            viewer.scene.screenSpaceCameraController.maximumZoomDistance = 600; //相机高度的最大值
+
+             //设置操作习惯(禁止中间滑轮旋转视角)  允许用户放大/缩小的输入。   //鼠标滑轮与两指缩放
+            viewer.scene.screenSpaceCameraController.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH];
+            //允许用户以3D和Columbus视图倾斜（旋转）或以2D扭曲的输入。  //按下鼠标右键与两指拖拽
+            viewer.scene.screenSpaceCameraController.tiltEventTypes = [Cesium.CameraEventType.PINCH, Cesium.CameraEventType.RIGHT_DRAG];
+            //相机平移旋转惯性为0
+            viewer.scene.screenSpaceCameraController.inertiaTranslate=0;
+            viewer.scene.screenSpaceCameraController.inertiaSpin=0;
+
+
+            //function boxEntityOptions(_entityName,_lon,_lat,_height,_boxlength,_boxwidth,_boxheight)
+            //办公大楼
+            //var bg=viewer.entities.add(boxEntityOptions('200',114.1384988,30.4667863,28,16.0,57.0, 20.0));
+            //生产车间
+            // var sccj=viewer.entities.add(boxEntityOptions('201',114.1390909,30.4670504,28,80.0,57.0, 20.0));
+            // //辅助车间
+            // var fzcj=viewer.entities.add(boxEntityOptions('202',114.1397720,30.4671438,25,25.0,40.0, 28.0));
+            // //保安室
+            // var bas=viewer.entities.add(boxEntityOptions('203',114.1383130,30.4664435,19,10.0,12.0, 5.0));
+            //配电间
+            // var pdj=viewer.entities.add(boxEntityOptions('204',114.1383634,30.4663537,19, 8.0,5.0, 4.0));
+            // //生产车间中
+            // var sccj_M=viewer.entities.add(boxEntityOptions('205',114.13864999999997,30.46684200000001, 23.5,18.0,18,26));
+            // //生产车间左
+            // var sccj_L=viewer.entities.add(boxEntityOptions('206',114.13856499999997,30.466997999999997, 20,18.0,20,16));
+            // //生产车间右
+            // var sccj_R=viewer.entities.add(boxEntityOptions('207',114.13873500000003,30.4666979999999,20, 18.0,18,16));
+            //展厅 gltf      
+            // var zt =  viewer.entities.add(gltfEntityOptions('208','../../SampleData/ChangHua/office/5foffice.gltf')) ;
+            // //展厅配电房 gltf 
+            // var ztpdf =  viewer.entities.add(gltfEntityOptions('209','../../SampleData/ChangHua/peidian/peidian2.gltf')) ;
+
+             //展厅配电柜
+        //    var ztpdg=viewer.entities.add(boxEntityOptions('',114.13841350000027,30.466837299999973,39.2,3.5999999999999996,1.0,2.1999999999999993));
+        //    ztpdg.box.material=Cesium.Color.WHITE.withAlpha(1)
+
+       
+        //  = viewer.entities.add(createModeEntity('ztpdg','../../SampleData/ChangHua/EleDevices/电柜.gltf',105,Cesium.Color.WHITE,114.13845870000046,30.46678400000016,38.8,63)) ;
+           
+          
+
+           /*创建模型实体函数*/
+           function createModeEntity(id,uri,scale,color,lon,lat,height,yaw){
+            if(yaw==undefined){yaw=-117}
+            var entityVar={
+             id:id,
+             show:false,
+             position:Cesium.Cartesian3.fromDegrees(lon,lat,height),
+             orientation: Cesium.Transforms.headingPitchRollQuaternion(Cesium.Cartesian3.fromDegrees(lon,lat,height),
+                    new Cesium.HeadingPitchRoll(
+                        Cesium.Math.toRadians(yaw),   //-27为正
+                        Cesium.Math.toRadians(0),
+                        Cesium.Math.toRadians(0)
+                    )
+                ),            
+             model:{
+                   uri:uri,
+                   scale:scale,
+                   color:color.withAlpha(0.5),
+                   silhouetteColor:color,
+                   silhouetteSize:1
+               }
+
+            }
+            return entityVar;
+           }
+
+            /*创建折线*/
+            function createPolyline(id,color,lon,lat,height){
+             var polylineVar={
+            id:id,
+            polyline:{
+            positions:Cesium.Cartesian3.fromDegreesArrayHeights([lon,lat,height,lon,lat,height+3.5]),
+            width:5,
+            material:new Cesium.PolylineArrowMaterialProperty(color)
+            }
+            }
+             return polylineVar
+            }
+
+        //02靠后
+        var pdjwaike,gaoyagui,diyagui,bianyaqi,gaoyagui_02,diyagui_02
+        var polyline_gao,polyline_di,polyline_bian
+        var gao_tip,di_tip,bian_tip,pdj_tip
+        var isWatchBoxpdj=false;  
+
+        function boxpdfAllEntity(){
+           gaoyagui=viewer.entities.add(createModeEntity('gaoyagui','../../SampleData/ChangHua/boxpdf/gaoya1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           diyagui=viewer.entities.add(createModeEntity('diyagui','../../SampleData/ChangHua/boxpdf/diya1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;   
+           bianyaqi=viewer.entities.add(createModeEntity('bianyaqi','../../SampleData/ChangHua/boxpdf/bianyaqi.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           gaoyagui_02=viewer.entities.add(createModeEntity('gaoyagui_02','../../SampleData/ChangHua/boxpdf/gaoya2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           diyagui_02=viewer.entities.add(createModeEntity('diyagui_02','../../SampleData/ChangHua/boxpdf/diya2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) 
+           polyline_gao=viewer.entities.add(createPolyline('polyline_gao',Cesium.Color.BLUE,114.1383862,30.4663610,18.5)) ;
+           polyline_di=viewer.entities.add(createPolyline('polyline_di',Cesium.Color.BLUE,114.1383634,30.4663537,18.5)) ;
+           polyline_bian=viewer.entities.add(createPolyline('polyline_bian',Cesium.Color.BLUE,114.1383412,30.4663506,18.5)) ;
+           gao_tip=viewer.entities.add(itemName("gao_tip","高压柜",114.1383862,30.4663610,21.0))
+           di_tip=viewer.entities.add(itemName("di_tip","低压柜",114.1383634,30.4663537,21.0))
+           bian_tip=viewer.entities.add(itemName("bian_tip","变压器",114.1383412,30.4663506,21.0))
+        }
+
+
+           /*查看配电间结构*/
+        function watchBoxpdjStructure(){
+            if(isWatchBoxpdj==false){
+           viewer.entities.remove(pdj_tip);
+           gaoyagui=viewer.entities.add(createModeEntity('gaoyagui','../../SampleData/ChangHua/boxpdf/gaoya1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           diyagui=viewer.entities.add(createModeEntity('diyagui','../../SampleData/ChangHua/boxpdf/diya1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;   
+           bianyaqi=viewer.entities.add(createModeEntity('bianyaqi','../../SampleData/ChangHua/boxpdf/bianyaqi.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           gaoyagui_02=viewer.entities.add(createModeEntity('gaoyagui_02','../../SampleData/ChangHua/boxpdf/gaoya2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           diyagui_02=viewer.entities.add(createModeEntity('diyagui_02','../../SampleData/ChangHua/boxpdf/diya2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) 
+           
+           polyline_gao=viewer.entities.add(createPolyline('polyline_gao',Cesium.Color.BLUE,114.1383862,30.4663610,18.5)) ;
+           polyline_di=viewer.entities.add(createPolyline('polyline_di',Cesium.Color.BLUE,114.1383634,30.4663537,18.5)) ;
+           polyline_bian=viewer.entities.add(createPolyline('polyline_bian',Cesium.Color.BLUE,114.1383412,30.4663506,18.5)) ;
+           gao_tip=viewer.entities.add(itemName("gao_tip","高压柜",114.1383862,30.4663610,21.0))
+           di_tip=viewer.entities.add(itemName("di_tip","低压柜",114.1383634,30.4663537,21.0))
+           bian_tip=viewer.entities.add(itemName("bian_tip","变压器",114.1383412,30.4663506,21.0))
+
+           isWatchBoxpdj=true      
+        }else{
+            pdj_tip=viewer.entities.add(labelEntityOptions('304','pdj_tip',114.1383598,30.4663539, 23,'../../SampleData/ChangHua/image/boxpdf1.png'))
+            viewer.entities.remove(gaoyagui)
+            viewer.entities.remove(diyagui)
+            viewer.entities.remove(bianyaqi)
+            viewer.entities.remove(polyline_gao)
+            viewer.entities.remove(polyline_di)
+            viewer.entities.remove(polyline_bian)
+            viewer.entities.remove(gao_tip)
+            viewer.entities.remove(di_tip)
+            viewer.entities.remove(bian_tip)
+            viewer.entities.remove(gaoyagui_02)
+            viewer.entities.remove(diyagui_02)
+
+            isWatchBoxpdj=false
+        }
+        }
+        
+        var zt,zt_tip,ztpdf,ztpdf_tip;
+        var ztpdg,polyline_ztpdg,ztpdf_rise;
+        var isWatchZTpdj=false;
+         /*查看展厅配电间结构*/
+        function watchZTpdjStructure(){
+            if(isWatchZTpdj==false){
+            //ztpdf_rise=viewer.entities.add(gltfEntityOptions('ztpdf_rise','../../SampleData/ChangHua/peidian/peidian2.gltf')) ;
+            ztpdf_rise=viewer.entities.add(createModeEntity('ztpdf_rise','../../SampleData/ChangHua/peidian/peidian2.gltf',105,Cesium.Color.YELLOW,114.13846699999996,30.46676929999999,32.2,63))
+            ztpdf_rise.position=Cesium.Cartesian3.fromDegrees(114.13846699999996,30.46676929999999,39);
+            ztpdf_rise.model.color=Cesium.Color.YELLOW.withAlpha(0.3) ;
+            ztpdf_rise.model.silhouetteSize=1
+            ztpdf_rise.model.silhouetteColor=Cesium.Color.YELLOW
+            ztpdf_tip.position=Cesium.Cartesian3.fromDegrees(114.1384221000001,30.466840399999988, 43); 
+            ztpdg=viewer.entities.add(createModeEntity('ztpdg','../../SampleData/ChangHua/EleDevices/diangui.gltf',105,Cesium.Color.DODGERBLUE,114.13845870000046,30.46678400000016,39.8,63)) ; 
+            polyline_ztpdg=viewer.entities.add(createPolyline('polyline_ztpdg',Cesium.Color.BLUE,114.1384221000001,30.466840399999988, 34.7)) ;
+            isWatchZTpdj=true;
+        }else{
+            viewer.entities.remove(ztpdf_rise)
+            viewer.entities.remove(ztpdg)
+            viewer.entities.remove(polyline_ztpdg)
+            ztpdf_tip.position=Cesium.Cartesian3.fromDegrees(114.1384221000001,30.466840399999988, 39); 
+            isWatchZTpdj=false;
+        }
+        }
+            //文本标签
+            //labelEntityOptions(_entityName,_areaName,_lon,_lat,_height)  
+            // var bg_tip = viewer.entities.add(labelEntityOptions('300','昌华办公楼',114.13855079999978,30.466648400000096, 40));
+            // var sccj_tip=viewer.entities.add(labelEntityOptions('301','生产车间',114.1390357,30.4670246, 40));
+            // var fzcj_tip=viewer.entities.add(labelEntityOptions('302','辅助车间',114.1397563,30.4671555, 40));
+            // var bas_tip=viewer.entities.add(labelEntityOptions('303','保安室',114.1383095,30.4664409, 23));
+            // var pdj_tip=viewer.entities.add(labelEntityOptions('304','箱式配电房\n受电容量：--kVA',114.1383598,30.4663539, 23,'../../SampleData/ChangHua/image/boxpdf1.png'));
+            // var sccj_M_tip=viewer.entities.add(labelEntityOptions('305','休息区2',114.13864999999997,30.46684200000001, 40));
+            // var sccj_L_tip=viewer.entities.add(labelEntityOptions('306','休息区1',114.13856499999997,30.466997999999997, 35));
+            // var sccj_R_tip=viewer.entities.add(labelEntityOptions('307','休息区3',114.13873500000003,30.4666979999999, 35));
+            // var zt_tip=viewer.entities.add(labelEntityOptions('308','展厅\n用电功率：--kW',114.13846699999996,30.46676929999999,38,'../../SampleData/ChangHua/image/zt.png'));
+            // var ztpdf_tip=viewer.entities.add(labelEntityOptions('309','展厅配电房\n受电容量：--kVA',114.1384221000001,30.466840399999988, 39,'../../SampleData/ChangHua/image/ztpdf.png'));
+            
+            //移除所有实体
+             viewer.entities.removeAll();
+            //文本点击标签
+            // var pdj_click_tip=viewer.entities.add(itemName('404','详细信息',114.1383598,30.4663539, 22));
+            // var zt_click_tip=viewer.entities.add(itemName('408','详细信息',114.13846699999996,30.46676929999999,37));
+            // var ztpdf_click_tip=viewer.entities.add(itemName('409','详细信息',114.1384221000001,30.466840399999988, 38));
+             
+             //文本按钮标签
+            // var pdj_button_tip=viewer.entities.add(labelEntityButtonOptions('404','',114.1383149,30.4663578,22));
+            // var zt_button_tip=viewer.entities.add(labelEntityButtonOptions('408','',114.1384242,30.4667539,36));
+            // var ztpdf_button_tip=viewer.entities.add(labelEntityButtonOptions('409','',114.1383932,30.4668174,36));
+
+          
+            
+            //按照指定的周期（以毫秒计）来调用函数或计算表达式
+            //setInterval(function(){ blueBox.box.dimensions = Cesium.Cartesian3.fromDegrees(16.0,57.0, 40.0);console.log(22222) }, 5000);
+
+//             var clock = new Cesium.Clock({
+//    startTime : Cesium.JulianDate.fromIso8601('2019-01-01T10:00:00.00Z'),
+//    currentTime : Cesium.JulianDate.fromIso8601('2019-01-01T10:00:00.00Z'),
+//    stopTime : Cesium.JulianDate.fromIso8601('2019-01-01T10:00:12.00Z'),  //2秒
+//    clockRange : Cesium.ClockRange.LOOP_STOP,
+//    clockStep : Cesium.ClockStep.SYSTEM_CLOCK_MULTIPLIER,
+//    shouldAnimate:true,
+//    canAnimate:true
+// });
+
+
+//             function PropertyTest(){
+//                 var property = new Cesium.SampledProperty(Cesium.Cartesian3);
+//                 property.addSample(clock.startTime, 
+//                 //new Cesium.Cartesian3(400000.0, 300000.0, 200000.0));
+
+//                 Cesium.Cartesian3.fromDegrees(114.1384988,30.4667863,28));
+
+//                 property.addSample(clock.stopTime, 
+//                 // new Cesium.Cartesian3(400000.0, 300000.0, 700000.0));
+//                 Cesium.Cartesian3.fromDegrees(114.1384988,30.4667863,40));
+
+//                 blueBox.box.dimensions = property;
+//             }
+//             viewer.clock=clock;
+//             PropertyTest();
+
+
+            //生产区域显示 5-3
+            function productArea(_show)
+            {           
+                // var colorVar=Cesium.Color.RED.withAlpha(0.5);
+                // if(_show==false){
+                //     colorVar=Cesium.Color.RED.withAlpha(0.0);  //0为不渲染 不交互
+                // }else{
+                //     changCameraView(199);  //相机定位到上空
+                // }     
+                //实体显示    
+                // sccj_M.box.material=colorVar;
+                // sccj_L.box.material=colorVar;
+                // sccj_R.box.material=colorVar;
+                // sccj.box.material=colorVar;
+                // fzcj.box.material=colorVar;
+                //标签显示
+                // sccj_M_tip.show=_show;
+                // sccj_L_tip.show=_show;
+                // sccj_R_tip.show=_show;
+                // sccj_tip.show=_show;
+                // fzcj_tip.show=_show;
+            }
+            //viewer.zoomTo(bg);
+
+            //配电区域显示 2  黄色
+            function distributElectricArea()
+            {
+                removeAllAreaEntities();
+                // electricArea_Single(true,pdj,pdj_tip,pdj_button_tip,false,Cesium.Color.YELLOW,false);  
+                // electricArea_Single(true,ztpdf,ztpdf_tip,ztpdf_button_tip,true,Cesium.Color.YELLOW,false);  
+            }
+
+              //用电区域显示 8  蓝色
+              function useElectricArea()
+              {            
+                removeAllAreaEntities();
+                // electricArea_Single(true,zt,zt_tip,zt_button_tip,true,Cesium.Color.DODGERBLUE,false);  
+              }
+ 
+
+            //区域显示 
+            function electricArea_Single(_show,_entity,_tipEntity,_clickTipEntity,_isModel,_color,_isView)
+            {
+               // Sandcastle.declare(electricArea_Single);
+                var colorVar=_color.withAlpha(0.3);
+                var outlineColorVar=_color.withAlpha(1); 
+                var num= parseInt(_entity.name);
+                
+                 if(_show==true){   //显示
+                    //changCameraView(num);
+                    //if的优雅写法
+                    _isView&&changCameraView(num);
+                    if(_isModel){      //是模型                
+                        //透明度
+                        _entity.model.color=colorVar;    //模型颜色
+                        _entity.model.silhouetteSize=1;  //轮廓大小
+                        _entity.model.silhouetteColor=outlineColorVar;//给轮廓颜色
+
+                    }else{
+                        _entity.box.material=_color.withAlpha(0.2);;
+                        _entity.box.outline=true; 
+                        _entity.box.outlineWidth=1;  //5宽了
+                        _entity.box.outlineColor=outlineColorVar;  
+                    }
+                }else{     
+                    colorVar=Cesium.Color.YELLOW.withAlpha(0.0);       //隐藏 
+                    if(_isModel){
+                    //透明度 为0
+                    _entity.model.color=colorVar;  
+                    //外轮廓
+                    _entity.model.silhouetteSize=0;
+                   
+                   }else{
+                    _entity.box.material=colorVar; 
+                    _entity.box.outline=false;                   
+                  }
+                 }
+               _tipEntity.show=_show;
+               // _clickTipEntity.show=_show; 
+
+            }
+            //所有区域实体移除
+            function removeAllAreaEntities()
+            {
+               viewer.entities.removeAll();
+               isWatchZTpdj=false;
+               isWatchBoxpdj=false;
+            //    viewer.entities.remove(zt);
+            //    viewer.entities.remove(zt_tip);
+            //    viewer.entities.remove(ztpdf);
+            //    viewer.entities.remove(ztpdf_tip);
+            //    viewer.entities.remove(pdjwaike);
+            //    viewer.entities.remove(pdj_tip);
+            //    viewer.entities.remove(ztpdg);
+            }
+     
+            //聚焦到主视野
+            function ToMainView(){
+                changCameraView(7);  
+            }
+
+            //聚焦到展厅
+            function ToZTView(){
+                // removeAllAreaEntities();
+                zt=viewer.entities.add(createModeEntity('208','../../SampleData/ChangHua/office/5foffice.gltf',105,Cesium.Color.DODGERBLUE,114.13846699999996,30.46676929999999,32.2,63))
+                zt_tip=viewer.entities.add(labelEntityOptions('308','展厅',114.13846699999996,30.46676929999999,38,'../../SampleData/ChangHua/image/zt.png'));
+                changCameraView(208);
+            }
+            
+            //聚焦到展厅配电房
+            function ToZTPDFView(){
+                // removeAllAreaEntities();
+                ztpdf=viewer.entities.add(createModeEntity('209','../../SampleData/ChangHua/peidian/peidian2.gltf',105,Cesium.Color.YELLOW,114.13846699999996,30.46676929999999,32.2,63))
+                ztpdf_tip=viewer.entities.add(labelEntityOptions('309','展厅配电房',114.1384221000001,30.466840399999988, 39,'../../SampleData/ChangHua/image/ztpdf.png'));
+                changCameraView(209);
+            }
+            //聚焦到配电间
+            function ToPDJView(){
+                // removeAllAreaEntities();
+                pdjwaike=viewer.entities.add(createModeEntity('204','../../SampleData/ChangHua/boxpdf/waike.gltf',2.2,Cesium.Color.YELLOW.withAlpha(0.5),114.1383634,30.4663537,17.8)) ;
+                pdj_tip=viewer.entities.add(labelEntityOptions('304','箱式配电房',114.1383598,30.4663539, 23,'../../SampleData/ChangHua/image/boxpdf1.png'));
+                changCameraView(204)
+            }
+
+             MyTest(true);
+             function MyTest(_show){
+                    if(_show==true){
+                    
+                    // //按钮
+                    //  Sandcastle.addToolbarButton("主视图", function () {
+                    //     ToMainView();
+                    // });
+                    //下拉框
+                    Sandcastle.addToolbarMenu([
+                    {
+                    text: "配电区域", //整体
+                    onselect: function () {
+                   // distributElectricArea();
+                    },
+                    },
+                    {
+                    text: "箱式配电房",
+                    onselect: function () {
+                        ToPDJView()
+                    },
+                    },
+                    {
+                    text: "展厅配电房",
+                    onselect: function () {
+                        ToZTPDFView()   
+                    },
+                    }
+                     ]);
+
+                 Sandcastle.addToolbarMenu([
+                    {
+                    text: "用电区域",
+                    onselect: function () {
+                   // useElectricArea();
+                    },
+                    },
+                    {
+                    text: "展厅",
+                    onselect: function () {
+                        ToZTView() 
+                    },
+                    }
+                ]);
+                // //按钮
+                // Sandcastle.addToolbarButton("线路", function () {          
+                //     showCable();
+                //     });
+                     //按钮
+                Sandcastle.addToolbarButton("展厅配电房结构", function () { 
+                    // removeAllAreaEntities();          
+                    watchZTpdjStructure();
+                   
+                });
+                Sandcastle.addToolbarButton("箱式配电房结构", function () {   
+                //    removeAllAreaEntities();       
+                   watchBoxpdjStructure()
+                });
+
+
+
+}
+}
+
+
+           //相机飞行
+           function flyToHeadingPitchRoll(_lon,_lat,_height,_head,_pitch) {
+            viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(_lon,_lat,_height),
+            orientation: {
+            heading: Cesium.Math.toRadians(_head),  //130
+            pitch: Cesium.Math.toRadians(_pitch),
+            roll: 0.0,
+            },
+            });
+            }
+
+            //办公大楼五楼基本位置数据：114.13845999999997,30.466784299999993  32.2   //114.13845699999997,30.466785299999994
+            // var bgFivePosition=Cesium.Cartesian3.fromDegrees(114.13845999999997,30.466784299999993,32.2);
+        
+            //调整位置用 true
+            LocTest(false);
+            function LocTest(_test){
+            if(_test==true){
+            //调整位置用   经度 相对昌华前后，越大越靠后0.00001 约为1米   纬度 相对昌华左右
+           // viewer.camera.flyTo({destination: new Cesium.Cartesian3( -2250105.7527921586,  5021106.510149779,  3215085.6741351397)});  
+               var arr=[114.1383634,30.4663537,17.8]
+               var _lon=arr[0]
+               var _lat= arr[1]
+               var _h=arr[2];
+               var _yaw=-27;
+               var _offsetYaw=0;
+               var _pitch=0;
+               var _offset=0.00001; //0.000001
+               var testPosition=Cesium.Cartesian3.fromDegrees(_lon,_lat,_h);
+              
+            //调整位置用
+            function JustLoc()
+            {
+                //var justPosition=Cesium.Cartesian3.fromDegrees(_lon,_lat,_h);
+                // testPosition=Cesium.Cartesian3.fromDegrees(_lon,_lat,_h);
+                testPosition= Cesium.Cartesian3.fromDegreesArrayHeights([_lon,_lat,_h,_lon,_lat,_h+3.3]),
+                  
+                polyline_gao.positions=testPosition;
+               // flyToHeadingPitchRoll(_lon,_lat,_h,_yaw,_pitch);
+                console.log('tiaozheng:'+_lon+','+_lat+','+_h+',yaw:'+_yaw+',pitch:'+_pitch);   
+            }
+            
+            //调整位置用
+           Sandcastle.addToolbarButton("lon-(后)", function () {     
+                _lon-=_offset    ;       
+                JustLoc();
+                
+           });
+
+           Sandcastle.addToolbarButton("lon+(前)", function () {     
+                _lon+=_offset    ;       
+                JustLoc();
+                
+           });
+           Sandcastle.addToolbarButton("lat+左", function () {                    
+                _lat+=_offset   ;         
+                JustLoc();
+           });
+           Sandcastle.addToolbarButton("lat-(右)", function () {                    
+                _lat-=_offset   ;         
+                JustLoc();
+                
+           });
+           Sandcastle.addToolbarButton("heig+(上)", function () {                    
+                _h+=2  ;         
+                JustLoc();
+           });
+           Sandcastle.addToolbarButton("heig-(下)", function () {                    
+            _h-=2 ;         
+                JustLoc();
+                
+           });
+
+           Sandcastle.addToolbarButton("yaw+", function () {                    
+            _yaw+=_offsetYaw  ;     
+                JustLoc();
+                
+           });
+           Sandcastle.addToolbarButton("yaw-", function () {                    
+                _yaw-=_offsetYaw   ;         
+                JustLoc();
+                
+           });
+           Sandcastle.addToolbarButton("pic+", function () {                    
+            _pitch+=_offsetYaw  ;     
+                JustLoc();
+                
+           });
+           Sandcastle.addToolbarButton("pic-", function () {                    
+                _pitch-=_offsetYaw   ;         
+                JustLoc();
+                
+           });
+
+}
+
+}
+            //调整大小用 true
+            dimensionsTest(false)
+            function dimensionsTest(_test){
+                if(_test){
+                var x=4
+                var y=1
+                var z=3
+                var _offset=0.2;
+
+                Sandcastle.addToolbarButton("x-", function () {     
+                x-=_offset
+                demensionsJust();
+                });
+                Sandcastle.addToolbarButton("x+", function () {     
+                x+=_offset
+                demensionsJust();
+                });
+                Sandcastle.addToolbarButton("y-", function () {     
+                y-=_offset
+                demensionsJust();
+                });
+                Sandcastle.addToolbarButton("y+", function () {     
+                y+=_offset
+                demensionsJust();
+                });
+                Sandcastle.addToolbarButton("z-", function () {     
+                z-=_offset
+                demensionsJust();
+                });
+                Sandcastle.addToolbarButton("z+", function () {     
+                z+=_offset
+                demensionsJust();
+                });
+            function demensionsJust(){
+                // ztpdg.box.dimensions=new Cesium.Cartesian3(x, y, z);
+                console.log("x="+x+",y="+y+",z="+z)
+            }
+                
+            }}
+
+
+            /**label 图标显示**/
+            function labelEntityOptions(_entityName,_areaName,_lon,_lat,_height,_src){
+              var entityVar = {
+                name:_entityName,
+                position: Cesium.Cartesian3.fromDegrees(_lon,_lat,_height),
+             point : {
+                 pixelSize : 6,
+                 color : Cesium.Color.CYAN,
+                 outlineColor : Cesium.Color.WHITE,
+                 outlineWidth : 2,
+                 disableDepthTestDistance: Number.POSITIVE_INFINITY,  //深度检测关闭
+                 distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 100), //大于50米 小于1米的地方不显示
+                //  scaleByDistance: new Cesium.NearFarScalar(50, 1, 100, 0.5),
+                // heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND //相对于地形的位置
+                },
+            //     label :{
+            //     text : _areaName,
+            //     font : '8pt monospace',
+            //     style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            //     outlineWidth : 2,
+            //     verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+            //     pixelOffset : new Cesium.Cartesian2(0, -9),
+            //     showBackground:true,
+            //     //disableDepthTestDistance: Number.POSITIVE_INFINITY  //深度检测关闭
+            //   },
+              billboard:{
+                  image:_src,
+                  scale:1,
+                  show:true,
+                //   scaleByDistance: new Cesium.NearFarScalar(50, 1, 200, 0.1), //根据距离缩放 如果未定义，则使用恒定大小
+                 // sizeInMeters: true,
+                  disableDepthTestDistance: Number.POSITIVE_INFINITY,   //深度检测关闭
+                 // height:400
+                 pixelOffset: new Cesium.Cartesian2(-4, -60),
+               
+                 // eyeOffset:    new Cesium.Cartesian3(0,1,0)
+                 distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 100.0)
+              },
+              show:true
+              }
+              return entityVar;
+            }
+
+            
+            // 回调函数，来返回需要的值
+            var property = new Cesium.CallbackProperty(function (time, result){
+                //如果没有传入result  就默认为new Cesium.Cartesian2(-4,-60);
+                result = result || new Cesium.Cartesian2(0,0);
+                // console.log(result)
+                if(zt_tip.billboard.scale==0.5){ 
+                    result= new Cesium.Cartesian2(-4,-30);
+                    return result;
+                    }else{
+                    result= new Cesium.Cartesian2(-4,-60);
+                    return result;
+                    }
+
+            },false );
+
+            // zt_tip.billboard.pixelOffset=property;
+            
+
+              //label 标签属性
+            function itemName(_entityName,_areaName,_lon,_lat,_height){
+              var entityVar = {
+                name:_entityName,
+                position: Cesium.Cartesian3.fromDegrees(_lon,_lat,_height),
+                // point : {
+                //  pixelSize : 5,
+                //  color : Cesium.Color.RED,
+                //  outlineColor : Cesium.Color.WHITE,
+                //  outlineWidth : 2
+                // },
+                label :{
+                text : _areaName,
+                font : '8px monospace',
+                // style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                // fillColor:Cesium.Color.LIME,
+                outlineWidth : 2,
+                // verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset : new Cesium.Cartesian2(0, 0),
+                showBackground:true,
+                scale:1,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY,  //深度检测关闭
+                scaleByDistance: new Cesium.NearFarScalar(50, 1, 200, 0.1)
+              },
+              show:true
+              }
+              return entityVar;
+            }
+            
+            //点击进入
+            function labelEntityButtonOptions(_entityName,_areaName,_lon,_lat,_height){
+              var entityVar = {
+                name:_entityName,
+                position: Cesium.Cartesian3.fromDegrees(_lon,_lat,_height),
+                // point : {
+                //  pixelSize : 5,
+                //  color : Cesium.Color.RED,
+                //  outlineColor : Cesium.Color.WHITE,
+                //  outlineWidth : 2
+                // },
+                label :{
+                text : _areaName,
+                font : '20px monospace',
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                fillColor:Cesium.Color.LIME,
+                outlineWidth : 2,
+                verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset : new Cesium.Cartesian2(0, 0),
+                showBackground:false,
+                scale:1,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY  //深度检测关闭
+              },
+              show:false
+              }
+              return entityVar;
+            }
+
+
+           //box 实体属性
+           function boxEntityOptions(_entityName,_lon,_lat,_height,_boxlength,_boxwidth,_boxheight){
+
+            var entityVar={
+                name: _entityName,
+                position: Cesium.Cartesian3.fromDegrees(_lon,_lat,_height),
+                box: {
+                    dimensions: new Cesium.Cartesian3(_boxlength,_boxwidth,_boxheight),
+                    //new Cesium.Color(red, green, blue, alpha)颜色也可以这么定义，每个值都是0-1
+                    material: Cesium.Color.WHITE.withAlpha(0.01),
+                    outline:false
+                },
+                orientation: Cesium.Transforms.headingPitchRollQuaternion(
+                    Cesium.Cartesian3.fromDegrees(_lon,_lat,_height),
+                    new Cesium.HeadingPitchRoll(
+                        Cesium.Math.toRadians(-27),
+                        Cesium.Math.toRadians(0),
+                        Cesium.Math.toRadians(0)
+                    )
+                )
+            }
+            return entityVar;
+           }
+          
+           //gltf 实体属性
+           function gltfEntityOptions(_name,_uri){
+            var entityVar = {
+                name: _name,
+                show:true,   //默认显示  调节颜色透明度来显隐
+                position: Cesium.Cartesian3.fromDegrees(114.13846699999996,30.46676929999999,32.2),
+                orientation: Cesium.Transforms.headingPitchRollQuaternion(Cesium.Cartesian3.fromDegrees(114.13845999999997,30.466784299999993,32.2),
+                    new Cesium.HeadingPitchRoll(
+                        Cesium.Math.toRadians(63),   //-27为正
+                        Cesium.Math.toRadians(0),
+                        Cesium.Math.toRadians(0)
+                    )
+                ),              
+                model : {
+                    //../../SampleData/ChangHua/build/build.gltf
+                uri : _uri,
+                scale:105, //104
+                //Cesium.Color.WHITE.withAlpha(0.0) 
+                color:Cesium.Color.YELLOW.withAlpha(0.0)   
+                },
+                
+            };
+            return entityVar;
+           }
+
+
+            // viewer.entities.add({
+            //     position: Cesium.Cartesian3.fromDegrees(114.1383855, 30.4668285, 25),
+            //     point: {
+            //         color: Cesium.Color.RED, //点位颜色
+            //         pixelSize: 10 //像素点大小
+            //     },
+            //     id: '3F空调',
+            //     name: '空调',
+            //     label: {
+            //         text: '3F空调',
+            //         font: '14pt Source Han Sans CN', //字体样式
+            //         fillColor: Cesium.Color.BLACK, //字体颜色
+            //         backgroundColor: Cesium.Color.AQUA, //背景颜色
+            //         showBackground: true, //是否显示背景颜色
+            //         style: Cesium.LabelStyle.FILL, //label样式
+            //         outlineWidth: 2,
+            //         verticalOrigin: Cesium.VerticalOrigin.CENTER, //垂直位置
+            //         horizontalOrigin: Cesium.HorizontalOrigin.LEFT, //水平位置
+            //         pixelOffset: new Cesium.Cartesian2(10, 0) //偏移
+            //     },
+            //     description: {
+            //         '设备名称': '3F空调',
+            //         '运行状态': '开启',
+            //         '本月耗能': '388kW.h',
+            //     },
+            // });
+
+            // // //去除entity双击事件
+            // viewer.screenSpaceEventHandler.setInputAction(function () {
+            //     changCameraView(1)
+            // }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+
+            //渲染器报错解决方案
+            var fixGltf = function (gltf) {
+                if (!gltf.extensionsUsed) {
+                    return;
+                }
+
+                var v = gltf.extensionsUsed.indexOf('KHR_technique_webgl');
+                var t = gltf.extensionsRequired.indexOf('KHR_technique_webgl');
+                // 中招了。。
+                if (v !== -1) {
+                    gltf.extensionsRequired.splice(t, 1, 'KHR_techniques_webgl');
+                    gltf.extensionsUsed.splice(v, 1, 'KHR_techniques_webgl');
+                    gltf.extensions = gltf.extensions || {};
+                    gltf.extensions['KHR_techniques_webgl'] = {};
+                    gltf.extensions['KHR_techniques_webgl'].programs = gltf.programs;
+                    gltf.extensions['KHR_techniques_webgl'].shaders = gltf.shaders;
+                    gltf.extensions['KHR_techniques_webgl'].techniques = gltf.techniques;
+                    var techniques = gltf.extensions['KHR_techniques_webgl'].techniques;
+
+                    gltf.materials.forEach(function (mat, index) {
+                        gltf.materials[index].extensions['KHR_technique_webgl'].values = gltf.materials[
+                            index].values;
+                        gltf.materials[index].extensions['KHR_techniques_webgl'] = gltf.materials[index]
+                            .extensions['KHR_technique_webgl'];
+
+                        var vtxfMaterialExtension = gltf.materials[index].extensions[
+                            'KHR_techniques_webgl'];
+
+                        for (var value in vtxfMaterialExtension.values) {
+                            var us = techniques[vtxfMaterialExtension.technique].uniforms;
+                            for (var key in us) {
+                                if (us[key] === value) {
+                                    vtxfMaterialExtension.values[key] = vtxfMaterialExtension.values[value];
+                                    delete vtxfMaterialExtension.values[value];
+                                    break;
+                                }
+                            }
+                        };
+                    });
+
+                    techniques.forEach(function (t) {
+                        for (var attribute in t.attributes) {
+                            var name = t.attributes[attribute];
+                            t.attributes[attribute] = t.parameters[name];
+                        };
+
+                        for (var uniform in t.uniforms) {
+                            var name = t.uniforms[uniform];
+                            t.uniforms[uniform] = t.parameters[name];
+                        };
+                    });
+                }
+            }
+
+            Object.defineProperties(Cesium.Model.prototype, {
+                _cachedGltf: {
+                    set: function (value) {
+                        this._vtxf_cachedGltf = value;
+                        if (this._vtxf_cachedGltf && this._vtxf_cachedGltf._gltf) {
+                            fixGltf(this._vtxf_cachedGltf._gltf);
+                        }
+                    },
+                    get: function () {
+                        return this._vtxf_cachedGltf;
+                    }
+                }
+            });
+
+
+            // 获取模型在场景中的位置
+            var scene = viewer.scene;
+            var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas); //鼠标事件
+            
+            //输出位置，便于调试
+            handler.setInputAction(function (lclickment) {
+                // console.log(viewer)
+                //得到当前三维场景
+                var scene = viewer.scene;
+                //得到当前三维场景的椭球体
+                var ellipsoid = scene.globe.ellipsoid;
+                //var cartesian = LoadCesium.Viewer.camera.pickEllipsoid(lclickment.position, ellipsoid); //世界坐标
+                var cartesian = viewer.scene.pickPosition(lclickment.position); //场景坐标
+                console.log(cartesian)
+                // positionPick = cartesian;
+                var pinBuilder = new Cesium.PinBuilder();
+                if (cartesian) {
+                    var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+                    var lon = Cesium.Math.toDegrees(cartographic.longitude).toFixed(7);
+                    var lat = Cesium.Math.toDegrees(cartographic.latitude).toFixed(7);
+                    //地理高度
+                    //height = (cartographic.height+1).toFixed(2);
+                    //console.log(lon+","+lat+","+height);
+                    //相机高度
+                    // var height=viewer.camera.positionCartographic.height.toFixed(0);
+                    // var heading = Cesium.Math.toDegrees(camera.heading).toFixed(2)
+                    // var pitch = Cesium.Math.toDegrees(camera.pitch).toFixed(2)
+                    console.log(lon + "," + lat);
+                    // console.log(lclickment.position)
+                }
+            }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+            //气泡框样式
+            function renderdiv(obj) {
+                var div = `<div id='trackPopUpContent' style="position:absolute;top:0;left:0;height: 106px;width: 220px;border-radius: 10px;background-color: #fff;display: flex;flex-direction: column;justify-content: space-evenly;">
+                                <div style="display: flex;justify-content: space-around;width: 220px;height:30px;border-bottom: 2px solid #E7EFF6;line-height:30px;">
+                                    <span style="font-size:18px;color: #333;">${obj.area_name}</span>
+                                    <span style="font-size:16px;color: #666;">运行状态：<span style="color: #05cdb8;">${obj.status}</span></span>
+                                </div>
+                                <div style="display: flex;justify-content: space-around;width: 220px">
+                                    <div style="width:64px;height:50px;background-size: 100% 100%;background-color: black;background-image:url(${obj.img?obj.img:''})"></div>
+                                    <div style="font-size:20px;color: #323234;display: flex;flex-direction: column;height:50px;justify-content: space-around;">
+                                        <span  style="font-size:16px;color: #666;">进入：${obj.name}</span>
+                                        <span  style="font-size:16px;color: #666;">${obj.time}</span>
+                                    </div>
+                                </div>
+                                <div style="width: 32px;height:32px;background-color: #fff;position: absolute;left: 50%;bottom: 0;transform-origin: left bottom;transform: translateX(-50%) rotate(45deg);z-index: -1;"></div>
+                            </div>`
+                return div
+            }
+            
+
+            function renderArea(num) {
+              
+            }
+
+            function renderCom(obj) {
+                var div =  `<div id='trackPopUpContent' style="position:absolute;top:0;left:0;width: 140px;height: 55px;display: flex;user-select:none">
+                                <div id="commain" style="width: 140px;height: 55px;position: relative;">
+                                    <div id='comIntroduce' style="display: flex;flex-direction: column;justify-content: space-evenly;width: 140px;height: 55px;border-radius: 5px;background-color: #fff;position: absolute;">
+                                        <div style="font-size: 20px;color: #333;margin-left: 10px;font-weight: bold;margin-top:5px;">${obj.name}</div>
+                                        <div style="font-size: 16px;color: #666666;margin-left: 10px;">用电量:<span style="color: #0D94FF;font-size: 16px;">${obj.num}</span>Kwh</div>
+                                        <div style="background-color: #fff;width:20px;height: 20px;position: absolute;left: 50%;bottom: 0;transform-origin: left bottom;transform: translateX(-50%) rotate(45deg);z-index: -1;"></div>
+                                    </div>
+                                </div>
+                            </div>`
+                return div
+            }
+
+            //点击弹出气泡框处理
+            var scene = viewer.scene
+            var removeHandler;
+           
+            var autoInfoWindow;
+            var infoDiv = `<div id="trackPopUp" style="display:none;">
+                                
+                            </div>`;
+            $("#cesiumContainer").append(infoDiv);
+            var scalebil = null
+            var lastid = null
+            var lastname = '';
+
+            //鼠标交互事件
+            var handler3D = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+            handler3D.setInputAction(function (movement) {
+
+                //pick的类型 new Cesium.Cesium3DTileFeature ()  具有' primitive'属性的对象
+                var pick = scene.pick(movement.position);
+                if (pick && pick.id) {
+                    console.log(pick.id.name);
+                    // if (pick.id.wall) {
+                    //     return
+                    // }
+                    // buildSelect = true
+                    //console.log(pick);   pick.id ==>id: Entity
+                   
+                    if (pick.id.name) {     
+                        //lastname = pick.id.name;
+                      //切换视角
+                        // changCameraView(pick.id.name) ;   
+                      //点击进入标签事件        
+                    //    clickTipLabel(parseInt(pick.id.name));
+                    //     if (lastname != pick.id.name) {
+                    //         //console.log(pick.id.name);
+                    //         //ShowTipLabelText(parseInt(lastname),false);
+                    //         lastname = pick.id.name  //pick.id.name   Entity.name
+                            
+                    //     }
+                    }
+                //    var num = parseInt(pick.id.name);
+                //     if (num < 8) {    //<8
+                //         renderArea(num);
+                //         lastid = pick.id
+                //         //pick.id.box.material = Cesium.Color.RED.withAlpha(0.5)
+                //         if(pick.id._description) {
+                //             var param = {type:'areaControl',name:pick.id._description._value.name,index:pick.id._description._value.index}
+                //             window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param))
+                //         }
+                //         if(num==1) {
+                //             //给服务器发消息   进入到app页面界面
+                //             var param = {type:'toRoom',}
+                //             window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param))
+                //         }
+                //     }
+            }}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+             //点击实体的处理
+             function ShowTipLabelText(labelNum,labelEnter){
+                 //var labelNum=parseInt(labelName);
+                 switch(labelNum){
+                 case 204 :
+                   
+                      break;
+                 case 208 :
+                 
+                     break;
+                 case 209 :
+              
+                      break;
+                 
+                 default:
+                  break;
+                 }
+
+             }
+                //点击标签的处理
+            
+                function clickTipLabel(labelNum){
+                 var param;
+
+                 switch(labelNum){
+                 case 404 :
+                //  console.log('调用app配电间界面');
+                 param = {type:'topdj',}
+                 //window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param)) ; 
+                    break;
+                 case 408 :
+                 //.toString();   转成字符串  .indexOf 找不到返回-1
+                //    console.log('调用app展厅界面');
+                 //给服务器发消息   进入到app页面界面
+                   param = {type:'toRoom',}
+                   //alert('正在在加载界面');
+                   window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param)) ; 
+                     break;
+                 case 409 :
+                //    console.log('调用app展厅配电房界面');
+                   param = {type:'toztpdf',}
+                  // window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param)) ; 
+                      break; 
+                 default:
+                  break;
+                            
+                 }
+             }
+
+
+            // addPop(new Cesium.Cartesian2(834, 372),'#peidianM',`<div id='peidianM' style='position:absolute;width:52px;height:63px;background-image:url(./monitors/办公楼.png);background-size:100% 100%;'></div>`)
+
+            //插入气泡框
+            //参数分别为： 位置（包括x，y），元素的id，具体div，所属哪个实体
+            function addPop(position, el, div) {
+                // console.log(position)
+                $('#trackPopUp').empty()
+                if (div) {
+                    $('#trackPopUp').append(div)
+                }
+                var picked = scene.pick(position);
+                // console.log(picked)
+                if (Cesium.defined(picked)) {
+
+                    var id = Cesium.defaultValue(picked.id, picked.primitive.id);
+                    if (id instanceof Cesium.Entity) {
+
+                        function positionPopUp(c) {
+                            var x = c.x - ($(el).width()) / 2;
+                            var y = c.y - ($(el).height()) - 50;
+                            // console.log(y)
+                            $(el).css('transform', 'translate3d(' + x + 'px, ' + y +
+                                'px, 0)');
+                        }
+                        var c = new Cesium.Cartesian2(position.x, position.y);
+                        $('#trackPopUp').show();
+                        positionPopUp(c); // Initial position
+                        // at the place item
+                        // picked
+                        removeHandler = viewer.scene.postRender.addEventListener(function () {
+                            if(picked.id){
+                                if (picked.id._polyline != null) {
+                                var pos = {};
+                                pos.x = (id._polyline._positions._value["0"].x + id._polyline
+                                    ._positions._value[1].x) / 2;
+                                pos.y = (id._polyline._positions._value["0"].y + id._polyline
+                                    ._positions._value[1].y) / 2;
+                                pos.z = (id._polyline._positions._value["0"].z + id._polyline
+                                    ._positions._value[1].z) / 2;
+                                var changedC = Cesium.SceneTransforms.wgs84ToWindowCoordinates(
+                                    viewer.scene, pos);
+                            } else {
+                                var changedC = Cesium.SceneTransforms.wgs84ToWindowCoordinates(
+                                    viewer.scene, id._position._value);
+                            } // If things moved, move the popUp too
+                            if (changedC) {
+                                if ((c.x !== changedC.x) || (c.y !== changedC.y)) {
+                                    positionPopUp(changedC);
+                                    c = changedC;
+                                }
+                            }
+                            }
+                        });
+
+                    }
+                }
+            }
+
+            //插入二维图标
+            function addicon(el, position, div) {
+
+                $('#cesiumContainer').append(div)
+                var setPosition = function () { // 世界坐标
+                    var changedC = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, position);
+                    if (changedC) {
+                        // var cameraPos = viewer.camera.position;
+
+                        // // 获取当前坐标系标准
+                        // var ellipsoid = viewer.scene.globe.ellipsoid;
+
+                        // // 根据坐标系标准，将笛卡尔坐标转换为地理坐标
+                        // var cartographic = ellipsoid.cartesianToCartographic(cameraPos);
+
+                        // // 获取镜头的高度
+                        // var height = cartographic.height;
+                        var x = changedC.x - ($(el).width()) / 2;
+                        var y = changedC.y - ($(el).height()) / 2;
+                        $(el).css('transform', 'translate3d(' + x + 'px, ' + (y - 30) +
+                            'px, 0) ');
+                        // $(el).css('left', x/2 + 'px');
+                        // $(el).css('top', (y - 40)/2 + 'px');
+
+                    }
+
+                };
+
+                viewer.scene.postRender.addEventListener(setPosition);
+            }
+
+            var ykdiv =
+                `<div id='aa' style='position:absolute;left:0;top:0;width:60px;height:60px;background-image:url(./monitors/保安室.png);background-size:100% 100%'></div>`
+            // addicon('#aa',{x: -2250107.5491472892, y: 5021105.6096883975, z: 3215097.4899000465},ykdiv)
+
+
+            //根据选中模型传入参数进行相机视角的变换
+            function changCameraView(name) {
+                var id = parseInt(name)
+                //var id =name;
+                switch (id) {
+                    case 1:
+                        cameraFly(-2250057.9360240665, 5021231.932919044, 3215099.6692548073, 1.1048588680002025, -
+                            0.832890615352424, 0.0038975497944369053);
+                        break;
+                    case 2:
+                        cameraFly(-2250085.6194366263, 5021111.676343304, 3215170.4193177586, 2.669556013556785, -
+                            0.775512323933977, 0.0018614555066864824);
+                        break;
+                    case 3:
+                        cameraFly(-2250196.89557528, 5021263.76859276, 3215055.190346448, 0.19525071441616149, -
+                            0.8615837659917114, 0.0008760048796307984);
+                        break;
+                    case 4:
+                        cameraFly(-2250228.1375154094, 5021101.712360139, 3215087.2893654057, 0.037953515142417515, -
+                            0.5688784660754767, 0.00013223827002839528);
+                        break;
+                    case 5:
+                        cameraFly(-2250067.2418962135, 5021138.548388149, 3215074.5027641617, 2.009228435112293, -
+                            0.5230129463280591, 0.0030607323831191025);
+                        break;
+                    case 6:
+                        cameraFly(-2250088.078689386, 5021136.939456491, 3215060.3549679057, 2.199194698359964, -
+                            0.8042041985359583, 0.0034115970313930433);
+                        break;
+                    case 7: //主视角
+                        cameraFly(-2250005.4661550545, 5021226.063639169, 3215055.122453057, 1.0834079456070986, -
+                            0.40825263168157866, 0.002822926775658985);
+                        break;
+                    case 8:
+                        cameraFly(-2250093.3122152435, 5021115.778197721, 3215072.430033518, 4.225395297993878, -
+                            0.20442273622152407, 6.280544757920463);
+                        break;
+                    case 9:
+                        cameraFly(-2250073.8993121507, 5021132.679303474, 3215058.372984056, 1.1725488322812039, -
+                            0.14610279555574213, 0.002730849389487311);
+                        break;
+                    case 10:
+                        cameraFly(-2250078.851197967, 5021123.292676678, 3215083.113970417, 1.0978656485248957, -
+                            0.35690962433101303, 0.0027858471674013785);
+                        break;
+                    case 11:
+                        cameraFly(-2250071.935407224, 5021172.807194808, 3215091.7792041614, 1.0834080337952932, -
+                            0.40825453280451995, 0.002822952686493352);
+                        break;
+                    case 12:
+                        cameraFly(-2250057.093488871, 5021222.520826124, 3215087.7271788977, 1.0989728733823299, -
+                            0.8443750996243895, 0.0039361102814146065);
+                        break;
+                    case 13:
+                        cameraFly(-2250077.7352549313, 5021164.468451092, 3215105.025940189, 1.0795985722438193, -
+                            0.7176186857573121, 0.0034342649987895157);
+                        break;
+                    case 14:
+                        cameraFly(-2250106.274089896, 5021162.1077231495, 3215082.6587584317, 1.1048588722616834, -
+                            0.8328906173009187, 0.003434265760234645);
+                        break;
+                    case 15:
+                        cameraFly(-2250086.7167439046, 5021237.929574693, 3215124.349550846, 1.0787430458894338, -
+                            1.1485060564897225, 0.006321649087967174);
+                        break;
+                    // //展厅内部    高度
+                    // cameraFly(-2250098.937282304, 5021114.164267683, 3215097.658459878, 1.0834079456070986, -
+                    //         0.40825263168157866, 0.002822926775658985);   
+
+                    case 199:  //区域视野
+                   flyToHeadingPitchRoll(114.13686209999995,30.466322400000003,110,75,-10);
+                   //flyToHeadingPitchRoll(114.13726209999996,30.466422400000003,70,80,-20);  //配电区域
+                        break;                        
+                    case 200:  //办公楼
+                        cameraFly(-2250057.9360240665, 5021231.932919044, 3215099.6692548073, 1.1048588680002025, -
+                            0.832890615352424, 0.0038975497944369053);
+                        break;
+                    case 201:   //生产车间
+                        cameraFly(-2250196.89557528, 5021263.76859276, 3215055.190346448, 0.19525071441616149, -
+                            0.8615837659917114, 0.0008760048796307984);
+                        break;
+                    case 202:  //辅助车间
+                        cameraFly(-2250228.1375154094, 5021101.712360139, 3215087.2893654057, 0.037953515142417515, -
+                            0.5688784660754767, 0.00013223827002839528);
+                        break;
+                    case 203:  //保安室
+                        cameraFly(-2250067.2418962135, 5021138.548388149, 3215074.5027641617, 2.009228435112293, -
+                            0.5230129463280591, 0.0030607323831191025);
+                        break;
+                    case 204:  //箱式配电房
+                    // cameraFly(-2250088.078689386, 5021136.939456491, 3215060.3549679057, 2.199194698359964, -
+                    //         0.8042041985359583, 0.0034115970313930433);
+                    flyToHeadingPitchRoll(114.13801209999998,30.4663724,35,82,-15);
+                         
+                        break;
+                    case 205:  //休息区中
+                    flyToHeadingPitchRoll(114.1380839,30.4674836,60,130,0);
+                        break;
+                    case 206:  //休息区左
+                    flyToHeadingPitchRoll(114.1380839,30.4674836,60,130,0);
+                        break;
+                    case 207:  //休息区右
+                    flyToHeadingPitchRoll(114.1387104,30.4661232,60,0,0);
+                        break;
+                    case 208:  //展厅
+                    flyToHeadingPitchRoll(114.13811209999999,30.466772400000014,55,90,-25);
+                    // cameraFly(-2250098.937282304, 5021114.164267683, 3215097.658459878, 1.0834079456070986, -
+                    //         0.40825263168157866, 0.002822926775658985);  //展厅内部
+
+                    //114.1384621,30.466772400000014,75,yaw:65,pitch:-90 展厅顶部
+                        break;
+                    case 209:  //展厅配电房
+                    flyToHeadingPitchRoll(114.13801209999998,30.466822400000016,45,85,-15);
+                    default:
+                        break;
+
+                }
+
+            }
+
+            
+
+
+            //-2250098.937282304, 5021114.164267683, 3215094.658459878
+            //相机飞行函数的封装
+            function cameraFly(x, y, z, h, p, r) {
+                if (!x || !y || !z || !h || !p || !r) {
+                    return
+                } else {
+                    viewer.camera.flyTo({
+                        destination: new Cesium.Cartesian3(x, y, z),
+                        orientation: {
+                            // 指向
+                            heading: h,
+                            // 视角
+                            pitch: p,
+                            roll: r,
+                        }
+                    });
+                }
+
+            }
+
+
+            // 双击输出相机位置
+            handler3D.setInputAction(function (movement) {
+
+                // handler3D.destroy();		
+                var direction = viewer.camera._direction;
+                var x = Cesium.Math.toDegrees(direction.x);
+                var y = Cesium.Math.toDegrees(direction.y);
+                var z = Cesium.Math.toDegrees(direction.z);
+                // console.log(x+','+y+','+z)
+                var heading = viewer.camera.heading
+                var pitch = viewer.camera.pitch
+                console.log(viewer.camera.position)
+                console.log(heading)
+                console.log(pitch)
+                console.log(viewer.camera.roll)
+
+            }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+            //瓦片特征
+            // handler.setInputAction(function(movement) {
+            // var feature = scene.pick(movement.endPosition);
+            // if (feature instanceof Cesium.Cesium3DTileFeature) {
+            //  var propertyNames = feature.getPropertyNames();
+            //     var length = propertyNames.length;
+            //     for (var i = 0; i < length; ++i) {
+            // var propertyName = propertyNames[i];
+            // console.log(propertyName + ': ' + feature.getProperty(propertyName));   //name: mesh_0 batchId: 0
+            //     }
+            // }
+            // }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+
+            //生成楼层实体的方法
+            function renderFloorEntity(h) {
+                var floor = viewer.entities.add({
+                    name: '1',
+                    position: Cesium.Cartesian3.fromDegrees(114.1384988, 30.4667863, h), //28是正中心
+                    box: {
+                        dimensions: new Cesium.Cartesian3(17.0, 57.0, 3.7),
+                        //new Cesium.Color(red, green, blue, alpha)颜色也可以这么定义，每个值都是0-1
+                        material: Cesium.Color.RED.withAlpha(0.5),
+                        outline: false,
+                        // outlineColor: Cesium.Color.WHITE,
+                        outlineWidth: 0,
+                    },
+                    orientation: Cesium.Transforms.headingPitchRollQuaternion(
+                        Cesium.Cartesian3.fromDegrees(114.1384752, 30.4667764, 28),
+                        new Cesium.HeadingPitchRoll(
+                            Cesium.Math.toRadians(-27),
+                            Cesium.Math.toRadians(0),
+                            Cesium.Math.toRadians(0)
+                        )
+                    ),
+                });
+                return floor
+            }
+
+       //处理rn端穿过来的指令     
+       var msgbefore = null
+            var beforeFloor = null
+            //清除先前状态的方法
+            function removeBeforeStyle() {
+                if (msgbefore) {
+                    msgbefore.box.material = Cesium.Color.WHITE.withAlpha(0.01)
+                }
+                if (beforeFloor) {
+                    viewer.entities.remove(beforeFloor);
+                }
+                if (lastid) {
+                    lastid.box.material = Cesium.Color.WHITE.withAlpha(0.01)
+                }
+            }
+
+            //发送的 message 只能是字符串，所以需要将其他格式的数据转换成字符串，在接收到后再转换回去，其实直接用JSON.stringify和JSON.parse就可以
+            document.addEventListener("message", function (event) {
+                var message = JSON.parse(event.data)
+                switch (message.fn) {
+                    case 'reset':
+                        removeBeforeStyle();
+                        break;
+                    case 'mainscene':
+                        removeBeforeStyle();
+                        changCameraView(1);
+                        break;
+                    case 'selectbg':
+                        removeBeforeStyle();
+                        changCameraView(1);
+                        bg.box.material = message.param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED
+                            .withAlpha(0.01)
+                        msgbefore = bg;
+                        break;
+                    case 'selectsccj':
+                        removeBeforeStyle()
+                        changCameraView(3);
+                        sccj.box.material = message.param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED
+                            .withAlpha(0.01)
+                        msgbefore = sccj
+                        break;
+                    case 'selectpdf':
+                        removeBeforeStyle()
+                        changCameraView(6);
+                        pdj.box.material = message.param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED
+                            .withAlpha(0.01)
+                        msgbefore = pdj
+                        break;
+                    case 'selectbas':
+                        removeBeforeStyle()
+                        changCameraView(5);
+                        bas.box.material = message.param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED
+                            .withAlpha(0.01)
+                        msgbefore = bas
+                        break;
+                    case 'selectfzcj':
+                        removeBeforeStyle()
+                        changCameraView(4);
+                        fzcj.box.material = message.param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED
+                            .withAlpha(0.01)
+                        msgbefore = fzcj
+                        break;
+                    case 'selectFloor1':
+                        removeBeforeStyle()
+                        var floor = renderFloorEntity(20);
+                        beforeFloor = floor;
+                        break;
+                    case 'selectFloor2':
+                        removeBeforeStyle()
+                        var floor = renderFloorEntity(23);
+                        beforeFloor = floor;
+                        break;
+                    case 'selectFloor3':
+                        removeBeforeStyle()
+                        var floor = renderFloorEntity(26);
+                        beforeFloor = floor;
+                        break;
+                    case 'selectFloor4':
+                        removeBeforeStyle()
+                        var floor = renderFloorEntity(29);
+                        beforeFloor = floor;
+                        break;
+                    case 'selectFloor5':
+                        removeBeforeStyle()
+                        var floor = renderFloorEntity(32.5);
+                        beforeFloor = floor;
+                        break;
+                    case 'anfang':
+                        removeBeforeStyle()
+                        chwall.wall.show = !chwall.wall.show._value
+                        break;
+                    case 'addSecurity':
+                        changCameraView(12)
+                        for(var i=0;i<message.param.length;i++){
+                            addSecurity(message.param[i])
+                        }
+                        
+                        break;
+                    case 'removeSecurity':
+                        for(var j=0;j<message.param.length;j++){
+                            removeSecurity(message.param[j])
+                        }
+                        
+                        break;
+                    case 'showele':
+                        setvisible('add', [114.1382230, 30.4669216, 20, 114.1384924, 30.4664562, 20,
+                            114.1388156, 30.4665870, 20,
+                        ])
+                        break;
+                    case 'showoffwall':
+                        showoffwall(message.param)
+                        break;
+                    case 'removeEntity':
+                        removeEntity()
+                        break;
+                    case 'addEntity':
+                        addEntity()
+                        break;
+                    case 'addquyu':
+                        changCameraView(15)
+                        wpdz.show=true;
+                        wjkj.show=true;
+                        wpbg.show=true;
+                        wjbg.show=true;
+                        break;
+                    case 'removequyu':
+                        wpdz.show=false;
+                        wjkj.show=false;
+                        wpbg.show=false;
+                        wjbg.show=false;
+                        break;
+                    case 'home':
+                        changCameraView(7)
+                        break;
+                    case 'addpolyline':
+                        setvisible('add', [
+                                    114.1383623,30.4663526, 19,
+                                    114.1383482,30.4663846, 21, 
+                                    114.1387063,30.4665601, 21,
+                                    114.1387063,30.4665601, 40,
+                                    114.1385584,30.4668077, 40,
+                                ])
+                        break;
+                    case 'removepolyline':
+                        setvisible('del')
+                        break;
+                    //切换视角
+                    case 'toPDJView':
+                         ToPDJView();
+                        break;
+                    case 'toZTPDFView':
+                         ToZTPDFView();
+                        break;
+                    case 'toZTView':
+                         ToZTPDFView();
+                        break;
+                    //查看内部结构
+                    case 'watchBoxpdjStruct':
+                        watchBoxpdjStructure();
+                        break;
+                    case 'watchZTpdjStruct':
+                        watchZTpdjStructure();
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            //闭包外部调用
+            window.changhua = {
+
+                        reset: function() {
+
+                            removeBeforeStyle();
+
+                        },
+
+                        mainscene: function() {
+
+                            removeBeforeStyle();
+
+                            changCameraView(1);
+
+                        },
+
+                        selectbg: function(param) {
+
+                            removeBeforeStyle();
+
+                            changCameraView(1);
+
+                            bg.box.material = param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED.withAlpha(0.01)
+
+                            msgbefore = bg;
+
+                        },
+
+                        selectsccj: function(param) {
+
+                            removeBeforeStyle()
+
+                            changCameraView(3);
+
+                            sccj.box.material = param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED.withAlpha(0.01)
+
+                            msgbefore = sccj
+
+                        },
+
+                        selectpdf: 
+                        
+                            function(param) {
+
+                            removeBeforeStyle()
+
+                            changCameraView(6);
+
+                            pdj.box.material = param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED.withAlpha(0.01)
+
+                            msgbefore = pdj },
+
+                        selectbas: function(param) {
+
+                            removeBeforeStyle()
+
+                            changCameraView(5);
+
+                            bas.box.material = param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED.withAlpha(0.01)
+
+                            msgbefore = bas
+
+                        },
+
+                        selectfzcj: function(param) {
+
+                            removeBeforeStyle()
+
+                            changCameraView(4);
+
+                            fzcj.box.material = param ? Cesium.Color.RED.withAlpha(0.5) : Cesium.Color.RED.withAlpha(0.01)
+
+                            msgbefore = fzcj
+
+                        },
+
+                        selectFloor1: function() {
+
+                            removeBeforeStyle()
+
+                            var floor = renderFloorEntity(20);
+
+                            beforeFloor = floor;
+
+                        },
+
+                        selectFloor2: function() {
+
+                            removeBeforeStyle()
+
+                            var floor = renderFloorEntity(23);
+
+                            beforeFloor = floor;
+
+                        },
+
+                        selectFloor3: function() {
+
+                            removeBeforeStyle()
+
+                            var floor = renderFloorEntity(26);
+
+                            beforeFloor = floor;
+
+                        },
+
+                        selectFloor4: function() {
+
+                            removeBeforeStyle()
+
+                            var floor = renderFloorEntity(29);
+
+                            beforeFloor = floor;
+
+                        },
+
+                        selectFloor5: function() {
+
+                            removeBeforeStyle()
+
+                            var floor = renderFloorEntity(32.5);
+
+                            beforeFloor = floor;
+
+                        },
+
+                        anfang: function() {
+
+                            removeBeforeStyle()
+
+                            chwall.wall.show = !chwall.wall.show._value
+
+                        },
+
+                        addSecurity: function(param) {
+
+                            changCameraView(12)
+
+                            for(var i=0;i<param.length;i++){
+
+                                addSecurity(param[i])
+
+                            }
+
+                        },
+
+                        removeSecurity: function(param) {
+
+                            for(var j=0;j<param.length;j++){
+
+                                removeSecurity(param[j])
+
+                            }
+
+                        },
+
+                        showoffwall: function(param) {
+
+                            showoffwall(param)
+
+                        },
+
+                        removeEntity: function() {
+
+                            removeEntity()
+
+                        },
+
+                        addEntity: function() {
+
+                            addEntity()
+
+                        },
+
+                        addquyu: function() {
+
+                            changCameraView(15)
+
+                            wpdz.show=true;
+
+                            wjkj.show=true;
+
+                            wpbg.show=true;
+
+                            wjbg.show=true;
+
+                        },
+
+                        removequyu: function() {
+
+                            wpdz.show=false;
+
+                            wjkj.show=false;
+
+                            wpbg.show=false;
+
+                            wjbg.show=false;
+
+                        },
+
+                        home: function() {
+
+                            changCameraView(7)
+
+                        },
+                        
+                       // lll : function(){},
+                        toPDJView: ToPDJView,
+                        toZTPDFView: ToZTPDFView,
+                        toZTView:  ToZTView,
+                        showCableLine: showCable,
+                        
+                        watchZTpdjStruct: watchZTpdjStructure,
+                        watchBoxpdjStruct: watchBoxpdjStructure,
+
+                        addpolyline: function() {
+
+                            setvisible('add', [
+
+                                114.1383623,30.4663526, 19,
+
+                                114.1383482,30.4663846, 21, 
+
+                                114.1387063,30.4665601, 21,
+
+                                114.1387063,30.4665601, 40,
+
+                                114.1385584,30.4668077, 40,
+
+                            ])
+
+                        },
+
+                        removepolyline: function() {
+
+                            setvisible('del')
+
+                        },
+                        }
+
+           
+var pointAlpha=255;
+            //czml  路径
+            //1.定义
+const czml=[
+{
+id:"document",
+name:"myCzml",
+version:"1.0",
+clock:{
+    interval:"2012-08-04T16:00:00Z/2012-08-04T16:05:00Z",
+    currentTime:"2012-08-04T16:00:00Z",
+    multiplier: 30,
+}
+},
+// {
+// id:"shapel",
+// name:"Blue box",
+// position:{
+//     cartographicDegrees: [lon, lat, 3000.0],
+// },
+// box:{
+//     dimensions: {
+//         cartesian: [4000.0, 3000.0, 5000.0],
+// },
+// material:{
+//     solidColor:{
+//       color:{rgba:[0,0,255,255]}  
+//     }
+// }
+// }
+// },
+{
+    id: "point 1",
+    name: "point",
+    availability: "2012-08-04T16:00:00Z/2012-08-04T16:05:00Z",
+    position: {
+      epoch: "2012-08-04T16:00:00Z",
+      cartographicDegrees: [
+        0,114.1383623,30.4663526, 19,
+
+        100,114.1383482,30.4663846, 21, 
+
+        200,114.1387063,30.4665601, 21,
+
+        260,114.1387063,30.4665601, 40,
+
+        300,114.1385584,30.4668077, 40,
+        ],
+    },
+    point: {
+      color: {
+        rgba: [255, 0, 0, pointAlpha],
+      },
+      outlineColor: {
+        rgba: [255, 225, 225, pointAlpha],
+      },
+      outlineWidth: 2,
+      pixelSize: 8,
+    },
+  },
+  {
+    id: "point 2",
+    name: "point",
+    availability: "2012-08-04T16:00:00Z/2012-08-04T16:05:00Z",
+    position: {
+      epoch: "2012-08-04T16:00:00Z",
+      cartographicDegrees: [
+        30,114.1383623,30.4663526, 19,
+
+        130,114.1383482,30.4663846, 21, 
+
+        230,114.1387063,30.4665601, 21,
+
+        255,114.1387063,30.4665601, 40,
+
+        300,114.1385584,30.4668077, 40,
+        ],
+    },
+    point: {
+      color: {
+        rgba: [255, 0, 0, pointAlpha],
+      },
+      outlineColor: {
+        rgba: [255, 255, 255, pointAlpha],
+      },
+      outlineWidth: 2,
+      pixelSize: 8,
+    },
+  },
+  {
+    id: "point 3",
+    name: "point",
+    availability: "2012-08-04T16:00:00Z/2012-08-04T16:05:00Z",
+    position: {
+      epoch: "2012-08-04T16:00:00Z",
+      cartographicDegrees: [
+        60,114.1383623,30.4663526, 19,
+
+        160,114.1383482,30.4663846, 21, 
+
+        230,114.1387063,30.4665601, 21,
+
+        250,114.1387063,30.4665601, 40,
+
+        300,114.1385584,30.4668077, 40,
+        ],
+    },
+    point: {
+      color: {
+        rgba: [255, 0, 0, pointAlpha],
+      },
+      outlineColor: {
+        rgba: [255, 255, 255, pointAlpha],
+      },
+      outlineWidth: 2,
+      pixelSize: 8,
+    },
+  },
+  
+]
+//获得某个值 czml[i].xxx
+//2.加载
+var dataSourcePromise=Cesium.CzmlDataSource.load(czml);
+//dataSourcePromise.show=false;
+//3.添加
+// viewer.dataSources.add(dataSourcePromise);
+
+            //折线位置点
+            const polylineArr=[114.1383623,30.4663526, 19,
+
+            114.1383482,30.4663846, 21, 
+
+            114.1387063,30.4665601, 21,
+
+            114.1387063,30.4665601, 40,
+
+            114.1385584,30.4668077, 40,
+            ];
+            //普通折线
+            var polylineEntity;
+            
+            var isShowCable=false;
+            //显示电缆线路
+            function showCable(){
+            if(isShowCable==false){
+            polylineEntity=viewer.entities.add({
+            id:"polyline1",
+            name:"polyline1",
+            show:true,
+            polyline:{
+            positions:Cesium.Cartesian3.fromDegreesArrayHeights(polylineArr),
+            width:2,
+            //   material:Cesium.Color.GOLD
+            material:new Cesium.PolylineOutlineMaterialProperty({
+            color:Cesium.Color.DEEPSKYBLUE,
+            outlineColor:Cesium.Color.DEEPSKYBLUE,
+            outlineWidth:1
+            })
+            }
+            })
+                dataSourcePromise=Cesium.CzmlDataSource.load(czml);
+                viewer.dataSources.add(dataSourcePromise);
+                isShowCable=true;
+            }else{
+                viewer.entities.remove(polylineEntity)
+                viewer.dataSources.removeAll(true)
+                isShowCable=false;
+            }
+            }
+
+
+            //增加动态电缆材质  1.创建新的内置流动材质
+            function PolylineTrailLinkMaterialProperty(color, duration) {
+                this._definitionChanged = new Cesium.Event();
+                this._color = undefined;
+                this._colorSubscription = undefined;
+                this.color = color;
+                this.duration = duration;
+                this._time = (new Date()).getTime();
+            }
+            Object.defineProperties(PolylineTrailLinkMaterialProperty.prototype, {
+                isConstant: {
+                    get: function () {
+                        return false;
+                    }
+                },
+                definitionChanged: {
+                    get: function () {
+                        return this._definitionChanged;
+                    }
+                },
+                color: Cesium.createPropertyDescriptor('color')
+            });
+            PolylineTrailLinkMaterialProperty.prototype.getType = function (time) {
+                return 'PolylineTrailLink';
+            }
+            //每帧执行  成员方法
+            PolylineTrailLinkMaterialProperty.prototype.getValue = function (time, result) {
+                if (!Cesium.defined(result)) {
+                    result = {};
+                }
+                result.color = Cesium.Property.getValueOrClonedDefault(this._color, time, Cesium.Color.WHITE, result
+                    .color);
+                result.image = Cesium.Material.PolylineTrailLinkImage;
+                result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration;
+                return result;
+            }
+            PolylineTrailLinkMaterialProperty.prototype.equals = function (other) {
+                return this === other ||
+                    (other instanceof PolylineTrailLinkMaterialProperty &&
+                        Property.equals(this._color, other._color))
+            }
+            Cesium.PolylineTrailLinkMaterialProperty = PolylineTrailLinkMaterialProperty;
+            Cesium.Material.PolylineTrailLinkType = 'PolylineTrailLink';
+            Cesium.Material.PolylineTrailLinkImage = "./test/p.png";
+            Cesium.Material.PolylineTrailLinkSource = "czm_material czm_getMaterial(czm_materialInput materialInput)\n\
+                                                      {\n\
+                                                           czm_material material = czm_getDefaultMaterial(materialInput);\n\
+                                                           vec2 st = materialInput.st;\n\
+                                                           vec4 colorImage = texture2D(image, vec2(fract(st.s - time), st.t));\n\
+                                                           material.alpha = colorImage.a * color.a;\n\
+                                                           material.diffuse = (colorImage.rgb+color.rgb)/2.0;\n\
+                                                           return material;\n\
+                                                       }";
+           //2.添加到内置纹理缓存中                                            
+            Cesium.Material._materialCache.addMaterial(Cesium.Material.PolylineTrailLinkType, {
+                fabric: {
+                    type: Cesium.Material.PolylineTrailLinkType,
+                    uniforms: {
+                        color: new Cesium.Color(1.0, 0.0, 0.0, 0.5),
+                        image: Cesium.Material.PolylineTrailLinkImage,
+                        time: 0
+                    },
+                    source: Cesium.Material.PolylineTrailLinkSource
+                },
+                translucent: function (material) {
+                    return true;
+                }
+            });
+
+            var polyline_entity;
+
+            //调用写前面 就不会出现奇奇怪怪的报错了！！！
+            // setvisible('add', [
+
+            //     114.1383623,30.4663526, 19,
+
+            //     114.1383482,30.4663846, 21, 
+
+            //     114.1387063,30.4665601, 21,
+
+            //     114.1387063,30.4665601, 40,
+
+            //     114.1385584,30.4668077, 40,
+
+            //     ])
+
+
+
+            function setvisible(value, ary) {
+                switch (value) {
+                    case 'position':
+                        viewer.camera.setView({
+                            destination: Cesium.Cartesian3.fromDegrees(lon, lat, 300000)
+                        });
+                        break;
+                    case 'add':
+                                polyline_entity = viewer.entities.add({
+                                name: 'PolylineTrail',
+                                polyline: {
+                                    positions: Cesium.Cartesian3.fromDegreesArrayHeights(ary),
+                                    width: 6,
+                                    material: new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.AQUA.withAlpha(0.7), 10000)
+                                }
+                            });
+                        break;
+                    case 'del':
+                            viewer.entities.remove(polyline_entity);
+                        break;
+                }
+            }
+           
+        
+
+        }
+        //startup函数分界线  
+        if (typeof Cesium !== 'undefined') {
+            window.startupCalled = true;
+            startup(Cesium);
+        }
+
+    </script>
+    <script src='./menu/js/blooming-menu.min.js'></script>
+    <script>
+        function homeclick() {
+            window.changhua.home()
+        }
+
+        // function watchZTpdjStruct(){
+        //     window.changhua.watchZTpdjStruct();
+        // }
+        
+        // function watchBoxpdjStruct(){
+        //     window.changhua.watchBoxpdjStruct();
+        // }
+
+
+
+        var bloomingMenu = new BloomingMenu({
+            startAngle: -140,
+            endAngle: -40,
+            radius: 100,
+            itemsNum: 3,
+            itemAnimationDelay: 0.08,
+            fatherElement: document.getElementById('yk-contain')
+            })
+            bloomingMenu.render()
+
+            // Prevents "elastic scrolling" on Safari
+            document.addEventListener('touchmove', function(event) {
+            'use strict'
+            event.preventDefault()
+            })
+            
+            //按钮点击处理事件  展开菜单
+            bloomingMenu.props.elements.items.forEach(function (item, index) {
+                item.addEventListener('click', function () {
+                    console.log(index)
+                    clickMenuButton(index)
+                })
+            })
+
+            document.addEventListener('click',(e)=>{
+                if(e.target.className.indexOf('blooming-menu')==-1) {
+                    bloomingMenu.close()
+                }
+            })
+
+            function clickMenuButton(index){
+            switch(index){
+            case 3:
+            // window.changhua.home() 
+            break;
+            case 0:
+            //线路显示
+            // window.changhua.showCableLine();
+            break;
+            case 1:
+            //报警显示
+            break;
+            case 2:
+            //区域抽屉显示
+            //window.changhua.toZTView();
+            param = {type:'showDrawer',}
+            console.log('区域抽屉显示')
+            window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param)) ; 
+            break;
+            default:
+            break;
+            }
+            }
+
+
+        </script>
+</body>
+
+</html>

@@ -187,7 +187,8 @@
             window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param))
             });
 
-            viewer.zoomTo(tileset);
+            //viewer.zoomTo(tileset);
+            changCameraView(7)
             Sandcastle.finishedLoading();   //拖拽？
             
              //移动设备上禁掉以下几个选项，可以相对更加流畅
@@ -354,17 +355,17 @@
         function boxpdfAllEntity(){
             pdjwaike=viewer.entities.add(createModeEntity('204','../../SampleData/ChangHua/boxpdf/waike.gltf',2.2,Cesium.Color.YELLOW.withAlpha(0.5),114.1383634,30.4663537,17.8)) ;
             pdj_tip=viewer.entities.add(labelEntityOptions('304','箱式配电房',114.1383598,30.4663539, 23,'../../SampleData/ChangHua/image/boxpdf1.png'));
-           gaoyagui=viewer.entities.add(createModeEntity('gaoyagui','../../SampleData/ChangHua/boxpdf/gaoya1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
-           diyagui=viewer.entities.add(createModeEntity('diyagui','../../SampleData/ChangHua/boxpdf/diya1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
-           bianyaqi=viewer.entities.add(createModeEntity('bianyaqi','../../SampleData/ChangHua/boxpdf/bianyaqi.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
-           gaoyagui_02=viewer.entities.add(createModeEntity('gaoyagui_02','../../SampleData/ChangHua/boxpdf/gaoya2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
-           diyagui_02=viewer.entities.add(createModeEntity('diyagui_02','../../SampleData/ChangHua/boxpdf/diya2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5))
+           gaoyagui=viewer.entities.add(createModeEntity('gaoyagui','../../SampleData/ChangHua/boxpdf/gyg1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           diyagui=viewer.entities.add(createModeEntity('diyagui','../../SampleData/ChangHua/boxpdf/dyg1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           bianyaqi=viewer.entities.add(createModeEntity('bianyaqi','../../SampleData/ChangHua/boxpdf/byq.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           gaoyagui_02=viewer.entities.add(createModeEntity('gaoyagui_02','../../SampleData/ChangHua/boxpdf/gyg2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+           diyagui_02=viewer.entities.add(createModeEntity('diyagui_02','../../SampleData/ChangHua/boxpdf/dyg2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5))
            polyline_gao=viewer.entities.add(createPolyline('polyline_gao',Cesium.Color.BLUE,114.1383862,30.4663610,18.5)) ;
            polyline_di=viewer.entities.add(createPolyline('polyline_di',Cesium.Color.BLUE,114.1383634,30.4663537,18.5)) ;
            polyline_bian=viewer.entities.add(createPolyline('polyline_bian',Cesium.Color.BLUE,114.1383412,30.4663506,18.5)) ;
            gao_tip=viewer.entities.add(itemName("gao_tip","高压柜",114.1383862,30.4663610,21.0))
-           di_tip=viewer.entities.add(itemName("di_tip","低压柜",114.1383634,30.4663537,21.0))
-           bian_tip=viewer.entities.add(itemName("bian_tip","变压器",114.1383412,30.4663506,21.0))
+           di_tip=viewer.entities.add(itemName("di_tip","低压柜",114.1383412,30.4663506,21.0))
+           bian_tip=viewer.entities.add(itemName("bian_tip","变压器",114.1383634,30.4663537,21.0))  //114.1383634,30.4663537,21.0
         }
 
 
@@ -427,13 +428,65 @@
                     isWatchZTpdj=false;
                 }
             }
+
+            //昌华围墙
+            var chwall
+            function showoffwall(param) {
+                if (param == 'show') {
+                    chwall = viewer.entities.add({
+                        name: '15',
+                        wall: {
+                            positions: Cesium.Cartesian3.fromDegreesArrayHeights(
+                                //坐标点围起来
+                                [
+                                    114.1381554, 30.4666973, 30.0,
+                                    114.1381013, 30.4666913, 30.0,
+                                    114.1379485, 30.4669464, 30.0,
+                                    114.1396409, 30.4676896, 30.0,
+                                    114.1400278, 30.4670639, 30.0,
+                                    114.1383340, 30.4663091, 30.0,
+                                    114.1382941, 30.4663729, 30.0,
+                                ]),
+                            // material: new Cesium.GridMaterialProperty({
+                            //     color: Cesium.Color.DODGERBLUE,
+                            //     cellAlpha: 0.2,
+                            //     lineCount: new Cesium.Cartesian2(8, 8),
+                            //     lineThickness: new Cesium.Cartesian2(2.0, 2.0)
+                            // }),
+                            material: Cesium.Color.DODGERBLUE.withAlpha(0.5),
+                            outline: true,
+                            outlineWidth: 5,
+                            outlineColor: Cesium.Color.BLACK,
+                            show: true,
+                        },
+                        show:false,
+                        description: {
+                            '区域名称': '昌华围墙',
+                        },
+                    });
+                } else {
+                    viewer.entities.remove(chwall);
+                }
+            }
+            showoffwall('show');
+            //昌华园区铭牌
+            var nameplate=viewer.entities.add(labelEntityOptions('mingpai','主体',114.13855079999978,30.466648400000096, 40,'../../SampleData/ChangHua/image/garden.png'))
+
+            function TOGardenView(){
+            hideAllEntity();
+            chwall.show=true;
+            nameplate.show=true;
+            }
+
             //2.加载所有实体 展厅的  箱式配电间的
             boxpdfAllEntity();
             ztAllEntity();
+
             //3.添加到数组
             const allEntityArray=[
                 zt,zt_tip,ztpdf,ztpdf_tip, ztpdg,polyline_ztpdg,ztpdf_rise,ztpdf_rise_tip,
-                pdjwaike,gaoyagui,diyagui,bianyaqi,gaoyagui_02,diyagui_02, polyline_gao,polyline_di,polyline_bian, gao_tip,di_tip,bian_tip,pdj_tip
+                pdjwaike,gaoyagui,diyagui,bianyaqi,gaoyagui_02,diyagui_02, polyline_gao,polyline_di,polyline_bian, gao_tip,di_tip,bian_tip,pdj_tip,
+                chwall,nameplate
             ]
 
             //隐藏所有实体
@@ -446,7 +499,6 @@
                 isWatchBoxpdj=false
                 isWatchZTpdj=false
             }
-
 
             //生产区域显示
             function productArea(_show)
@@ -602,6 +654,9 @@
                 Sandcastle.addToolbarButton("线路", function () {
                             showCable();
                 });
+                Sandcastle.addToolbarButton("园区主体", function () {
+                    TOGardenView()   ;
+                });
              }
              }
 
@@ -756,7 +811,7 @@
                  outlineColor : Cesium.Color.WHITE,
                  outlineWidth : 2,
                  disableDepthTestDistance: Number.POSITIVE_INFINITY,  //深度检测关闭
-                 distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 100), //大于50米 小于1米的地方不显示
+                 distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 120), //大于50米 小于1米的地方不显示
                 //  scaleByDistance: new Cesium.NearFarScalar(50, 1, 100, 0.5),
                 // heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND //相对于地形的位置
                 },
@@ -771,7 +826,7 @@
                  pixelOffset: new Cesium.Cartesian2(-4, -60),
                
                  // eyeOffset:    new Cesium.Cartesian3(0,1,0)
-                 distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 100.0)
+                 distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 120.0)
               },
               show:false
               }

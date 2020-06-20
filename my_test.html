@@ -23,7 +23,7 @@
     <style>
         
       * {
-         user-select: none;
+         user-select: none !important;
         }
 
         #toolbar{
@@ -359,7 +359,7 @@
         var isWatchBoxpdj=false;  
 
         function boxpdfAllEntity(){
-            pdjwaike=viewer.entities.add(createModeEntity('204','../../SampleData/ChangHua/boxpdf/waike.gltf',2.2,Cesium.Color.YELLOW.withAlpha(0.5),114.1383634,30.4663537,17.8)) ;
+            pdjwaike=viewer.entities.add(createModeEntity('204','../../SampleData/ChangHua/boxpdf/waike.gltf',2.2,Cesium.Color.YELLOW,114.1383634,30.4663537,17.8)) ; //.withAlpha(0.5)
             pdj_tip=viewer.entities.add(labelEntityOptions('304','箱式配电房',114.1383598,30.4663539, 23,'../../SampleData/ChangHua/image/boxpdf1.png'));
         //    gaoyagui=viewer.entities.add(createModeEntity('gaoyagui','../../SampleData/ChangHua/boxpdf/gyg1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
         //    diyagui=viewer.entities.add(createModeEntity('diyagui','../../SampleData/ChangHua/boxpdf/dyg1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
@@ -408,9 +408,9 @@
         var isWatchZTpdj=false;
 
         function ztAllEntity() {
-            zt=viewer.entities.add(createModeEntity('208','../../SampleData/ChangHua/office/5foffice.gltf',105,Cesium.Color.DODGERBLUE,114.13846699999996,30.46676929999999,32.2,63))
+            zt=viewer.entities.add(createModeEntity('208','../../SampleData/ChangHua/office/5foffice.gltf',100,Cesium.Color.DODGERBLUE,114.13846699999996,30.46676929999999,32.2,63))
             zt_tip=viewer.entities.add(labelEntityOptions('308','展厅',114.13846699999996,30.46676929999999,38,'../../SampleData/ChangHua/image/zt.png'));
-            ztpdf=viewer.entities.add(createModeEntity('209','../../SampleData/ChangHua/peidian/peidian2.gltf',105,Cesium.Color.YELLOW,114.13846699999996,30.46676929999999,32.2,63))
+            ztpdf=viewer.entities.add(createModeEntity('209','../../SampleData/ChangHua/peidian/peidian2.gltf',100,Cesium.Color.YELLOW,114.13846699999996,30.46676929999999,32.2,63))
             ztpdf_tip=viewer.entities.add(labelEntityOptions('309','展厅配电房',114.1384221000001,30.466840399999988, 39,'../../SampleData/ChangHua/image/ztpdf.png'));
             // ztpdf_rise=viewer.entities.add(createModeEntity('ztpdf_rise','../../SampleData/ChangHua/peidian/peidian2.gltf',105,Cesium.Color.YELLOW,114.13846699999996,30.46676929999999,39,63))
             // ztpdf_rise_tip=viewer.entities.add(labelEntityOptions('ztpdf_rise_tip','展厅配电房',114.1384221000001,30.466840399999988, 43,'../../SampleData/ChangHua/image/ztpdf.png'));
@@ -1121,46 +1121,53 @@
             //鼠标交互事件
             var handler3D = new Cesium.ScreenSpaceEventHandler(scene.canvas);
             handler3D.setInputAction(function (movement) {
-
                 //pick的类型 new Cesium.Cesium3DTileFeature ()  具有' primitive'属性的对象
                 var pick = scene.pick(movement.position);
                 if (pick && pick.id) {
-                    // console.log(pick.id.name);
-                    // if (pick.id.wall) {
-                    //     return
-                    // }
-                    // buildSelect = true
-                    console.log(pick);  // pick.id ==>id: Entity
-                   
-                    if (pick.id.name) {     
-                        //lastname = pick.id.name;
-                      //切换视角
-                        // changCameraView(pick.id.name) ;   
-                      //点击进入标签事件        
-                    //    clickTipLabel(parseInt(pick.id.name));
-                    //     if (lastname != pick.id.name) {
-                    //         //console.log(pick.id.name);
-                    //         //ShowTipLabelText(parseInt(lastname),false);
-                    //         lastname = pick.id.name  //pick.id.name   Entity.name
-                            
-                    //     }
-                    }
-                //    var num = parseInt(pick.id.name);
-                //     if (num < 8) {    //<8
-                //         renderArea(num);
-                //         lastid = pick.id
-                //         //pick.id.box.material = Cesium.Color.RED.withAlpha(0.5)
-                //         if(pick.id._description) {
-                //             var param = {type:'areaControl',name:pick.id._description._value.name,index:pick.id._description._value.index}
-                //             window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param))
-                //         }
-                //         if(num==1) {
-                //             //给服务器发消息   进入到app页面界面
-                //             var param = {type:'toRoom',}
-                //             window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param))
-                //         }
-                //     }
-            }}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+                    console.log(pick.id);  // pick.id ==>id: Entity
+                //     var id = pick.id._id;
+                //     switch (id) {
+                //     case "CesiumMan":
+                //         entity2.model.silhouetteColor = Cesium.Color.RED;
+                //         entity2.model.silhouetteSize = 3.0;
+                //         break;
+                //     case "milkCar":
+                //         entity1.model.silhouetteColor = Cesium.Color.RED;
+                //         entity1.model.silhouetteSize = 3.0;
+                //         break;
+                // }
+ 
+            }else{
+                // console.log(pick)
+                // entity1.model.silhouetteSize = 0.0;
+                // entity2.model.silhouetteSize = 0.0;
+            }
+            }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+             // 双击输出相机位置 ！！！
+             handler3D.setInputAction(function (movement) {
+                // console.log(movement)    //鼠标位置
+                console.log('相机位置:\n'+viewer.camera.position)
+                var position=viewer.camera.position
+                //笛卡尔转经纬度
+                var cartographic=Cesium.Cartographic.fromCartesian(position)
+                console.log(cartographic)
+                //经纬度转笛卡尔
+                //Cesium.Cartesian3.fromDegrees()
+            
+                // console.log(viewer.camera.direction)
+                var roll_d= Cesium.Math.toDegrees(viewer.camera.roll)
+                var pitch_d= Cesium.Math.toDegrees(viewer.camera.pitch)
+                var heading_d= Cesium.Math.toDegrees(viewer.camera.heading)
+                //弧度制
+                var heading=viewer.camera.heading
+                var pitch=viewer.camera.pitch
+                var roll=viewer.camera.roll
+                console.log('弧度:'+heading +','+pitch+','+roll)
+                console.log('角度:\n'+'heading:'+ heading_d+',pitch:'+pitch_d+',roll:'+roll_d)
+                //heading : Cesium.Math.toRadians(175.0)  角度转弧度
+
+            }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
              //点击实体的处理
              function ShowTipLabelText(labelNum,labelEnter){
@@ -1375,7 +1382,7 @@
                     //         0.40825263168157866, 0.002822926775658985);   
 
                     case 199:  //区域视野
-                   flyToHeadingPitchRoll(114.13686209999995,30.466322400000003,110,75,-10);
+                //    flyToHeadingPitchRoll(114.13686209999995,30.466322400000003,110,75,-10);
                    //flyToHeadingPitchRoll(114.13726209999996,30.466422400000003,70,80,-20);  //配电区域
                         break;                        
                     case 200:  //办公楼
@@ -1395,29 +1402,29 @@
                             0.5230129463280591, 0.0030607323831191025);
                         break;
                     case 204:  //箱式配电房
-                    // cameraFly(-2250088.078689386, 5021136.939456491, 3215060.3549679057, 2.199194698359964, -
-                    //         0.8042041985359583, 0.0034115970313930433);
-                    flyToHeadingPitchRoll(114.13801209999998,30.4663724,35,82,-15);
+                    // flyToHeadingPitchRoll(114.13801209999998,30.4663724,35,82,-15);
+                    cameraFly(-2250085.277442557, 5021136.417924129, 3215055.1769797, 
+                    1.8240790083020526,-0.19419326450036545,0.002891078020039295);
                          
                         break;
                     case 205:  //休息区中
-                    flyToHeadingPitchRoll(114.1380839,30.4674836,60,130,0);
+                    // flyToHeadingPitchRoll(114.1380839,30.4674836,60,130,0);
                         break;
                     case 206:  //休息区左
-                    flyToHeadingPitchRoll(114.1380839,30.4674836,60,130,0);
+                    // flyToHeadingPitchRoll(114.1380839,30.4674836,60,130,0);
                         break;
                     case 207:  //休息区右
-                    flyToHeadingPitchRoll(114.1387104,30.4661232,60,0,0);
+                    // flyToHeadingPitchRoll(114.1387104,30.4661232,60,0,0);
                         break;
                     case 208:  //展厅
-                    flyToHeadingPitchRoll(114.13811209999999,30.466772400000014,55,90,-25);
-                    // cameraFly(-2250098.937282304, 5021114.164267683, 3215097.658459878, 1.0834079456070986, -
-                    //         0.40825263168157866, 0.002822926775658985);  //展厅内部
-
-                    //114.1384621,30.466772400000014,75,yaw:65,pitch:-90 展厅顶部
+                    // flyToHeadingPitchRoll(114.13811209999999,30.466772400000014,55,90,-25);
+                    cameraFly(-2250077.732464871, 5021156.631156574, 3215090.650627252, 
+                    1.084638408673257,-0.44319807658791666,0.002870075376232961);
                         break;
                     case 209:  //展厅配电房
-                    flyToHeadingPitchRoll(114.13801209999998,30.466822400000016,45,85,-15);
+                    // flyToHeadingPitchRoll(114.13801209999998,30.466822400000016,45,85,-15);
+                    cameraFly(-2250068.182461635, 5021147.1822296735, 3215093.8950981996, 
+                    1.1068942923665048,-0.22039434641525402,0.0026866925754465143);
                     default:
                         break;
                 }
@@ -1444,22 +1451,7 @@
                 }
             }
 
-            // 双击输出相机位置 ！！！
-            handler3D.setInputAction(function (movement) {
-                // handler3D.destroy();		
-                var direction = viewer.camera._direction;
-                var x = Cesium.Math.toDegrees(direction.x);
-                var y = Cesium.Math.toDegrees(direction.y);
-                var z = Cesium.Math.toDegrees(direction.z);
-                // console.log(x+','+y+','+z)
-                var heading = viewer.camera.heading
-                var pitch = viewer.camera.pitch
-                // console.log(viewer.camera.position)
-                // console.log(heading)
-                // console.log(pitch)
-                // console.log(viewer.camera.roll)
-
-            }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+           
 
             //瓦片特征
             // handler.setInputAction(function(movement) {
@@ -2185,7 +2177,7 @@ var dataSourcePromise=Cesium.CzmlDataSource.load(czml);
     <script src='./menu/js/blooming-menu.min.js'></script>
     <script>
         function homeclick() {
-            // window.changhua.home()
+            window.changhua.home()
         }
 
         function watchZTpdjStruct(){

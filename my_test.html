@@ -21,6 +21,11 @@
     <!-- <script src="../../plugins/ysCesium/ysCesium.js"></script> -->
     <!-- <link rel="stylesheet" href="./my.css"> -->
     <style>
+        
+      * {
+         user-select: none;
+        }
+
         #toolbar{
             top:50px;
         }
@@ -167,6 +172,8 @@
             //放置到场景中
             viewer.scene.primitives.add(tileset);
 
+            // viewer.zoomTo(tileset);
+            changCameraView(7)   //聚焦
             //瓦片样式
             tileset.style = new Cesium.Cesium3DTileStyle({
                 color: 'color("white",1)',
@@ -191,27 +198,22 @@
             window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(param))
             });
 
-            //viewer.zoomTo(tileset);
-            changCameraView(7)
+          
+           
             Sandcastle.finishedLoading();   //拖拽？
             
-             //移动设备上禁掉以下几个选项，可以相对更加流畅
-            if (navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i)) {
-            viewer.scene.fog.enable = false;
-            // viewer.scene.skyAtmosphere.show = false;
-            viewer.scene.fxaa = false;
-            }
+            //  //移动设备上禁掉以下几个选项，可以相对更加流畅
+            // if (navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i)) {
+            // viewer.scene.fog.enable = false;
+            // // viewer.scene.skyAtmosphere.show = false;
+            // viewer.scene.fxaa = false;
+            // }
             //显示帧率
             viewer.scene.debugShowFramesPerSecond = false;
             document.addEventListener('keydown', function (event) {
             var e = event || window.event || arguments.callee.caller.arguments[0];
             if (e) {
                 switch (e.keyCode) {
-                    case 82: //R键查看地形三角网
-                        // if (viewer.cesiumInspector) {
-                        //     viewer.cesiumInspector.viewModel.wireframe = !viewer.cesiumInspector.viewModel.wireframe;
-                        // }
-                        break;
                     case 70: //F键查看帧率
                         viewer.scene.debugShowFramesPerSecond = !viewer.scene.debugShowFramesPerSecond;
                         break;
@@ -222,7 +224,7 @@
 
             //min 变焦时相机位置的最小大小（以米为单位）。默认为1.0。
             viewer.scene.screenSpaceCameraController.minimumZoomDistance = 10;//相机的高度的最小值
-            viewer.scene.screenSpaceCameraController.maximumZoomDistance = 600; //相机高度的最大值
+            viewer.scene.screenSpaceCameraController.maximumZoomDistance = 1000; //相机高度的最大值
 
              //设置操作习惯(禁止中间滑轮旋转视角)  允许用户放大/缩小的输入。   //鼠标滑轮与两指缩放
             viewer.scene.screenSpaceCameraController.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH];
@@ -359,46 +361,46 @@
         function boxpdfAllEntity(){
             pdjwaike=viewer.entities.add(createModeEntity('204','../../SampleData/ChangHua/boxpdf/waike.gltf',2.2,Cesium.Color.YELLOW.withAlpha(0.5),114.1383634,30.4663537,17.8)) ;
             pdj_tip=viewer.entities.add(labelEntityOptions('304','箱式配电房',114.1383598,30.4663539, 23,'../../SampleData/ChangHua/image/boxpdf1.png'));
-           gaoyagui=viewer.entities.add(createModeEntity('gaoyagui','../../SampleData/ChangHua/boxpdf/gyg1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
-           diyagui=viewer.entities.add(createModeEntity('diyagui','../../SampleData/ChangHua/boxpdf/dyg1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
-           bianyaqi=viewer.entities.add(createModeEntity('bianyaqi','../../SampleData/ChangHua/boxpdf/byq.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
-           gaoyagui_02=viewer.entities.add(createModeEntity('gaoyagui_02','../../SampleData/ChangHua/boxpdf/gyg2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
-           diyagui_02=viewer.entities.add(createModeEntity('diyagui_02','../../SampleData/ChangHua/boxpdf/dyg2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5))
-           polyline_gao=viewer.entities.add(createPolyline('polyline_gao',Cesium.Color.BLUE,114.1383862,30.4663610,18.5)) ;
-           polyline_di=viewer.entities.add(createPolyline('polyline_di',Cesium.Color.BLUE,114.1383634,30.4663537,18.5)) ;
-           polyline_bian=viewer.entities.add(createPolyline('polyline_bian',Cesium.Color.BLUE,114.1383412,30.4663506,18.5)) ;
-           gao_tip=viewer.entities.add(itemName("gao_tip","高压柜",114.1383862,30.4663610,21.0))
-           di_tip=viewer.entities.add(itemName("di_tip","低压柜",114.1383412,30.4663506,21.0))
-           bian_tip=viewer.entities.add(itemName("bian_tip","变压器",114.1383634,30.4663537,21.0))  //114.1383634,30.4663537,21.0
+        //    gaoyagui=viewer.entities.add(createModeEntity('gaoyagui','../../SampleData/ChangHua/boxpdf/gyg1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+        //    diyagui=viewer.entities.add(createModeEntity('diyagui','../../SampleData/ChangHua/boxpdf/dyg1.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+        //    bianyaqi=viewer.entities.add(createModeEntity('bianyaqi','../../SampleData/ChangHua/boxpdf/byq.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+        //    gaoyagui_02=viewer.entities.add(createModeEntity('gaoyagui_02','../../SampleData/ChangHua/boxpdf/gyg2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5)) ;
+        //    diyagui_02=viewer.entities.add(createModeEntity('diyagui_02','../../SampleData/ChangHua/boxpdf/dyg2.gltf',2,Cesium.Color.DODGERBLUE,114.1383634,30.4663537,22.5))
+        //    polyline_gao=viewer.entities.add(createPolyline('polyline_gao',Cesium.Color.BLUE,114.1383862,30.4663610,18.5)) ;
+        //    polyline_di=viewer.entities.add(createPolyline('polyline_di',Cesium.Color.BLUE,114.1383634,30.4663537,18.5)) ;
+        //    polyline_bian=viewer.entities.add(createPolyline('polyline_bian',Cesium.Color.BLUE,114.1383412,30.4663506,18.5)) ;
+        //    gao_tip=viewer.entities.add(itemName("gao_tip","高压柜",114.1383862,30.4663610,21.0))
+        //    di_tip=viewer.entities.add(itemName("di_tip","低压柜",114.1383412,30.4663506,21.0))
+        //    bian_tip=viewer.entities.add(itemName("bian_tip","变压器",114.1383634,30.4663537,21.0))  //114.1383634,30.4663537,21.0
         }
 
 
            /*查看配电间结构*/
         function watchBoxpdjStructure(){
-            if(isWatchBoxpdj==false){
-                hideAllEntity();
-                gaoyagui.show=true;
-                gaoyagui_02.show=true;
-                polyline_gao.show=true;
-                gao_tip.show=true;
+        //     if(isWatchBoxpdj==false){
+        //         hideAllEntity();
+        //         gaoyagui.show=true;
+        //         gaoyagui_02.show=true;
+        //         polyline_gao.show=true;
+        //         gao_tip.show=true;
 
-                diyagui.show=true;
-                diyagui_02.show=true;
-                polyline_di.show=true;
-                di_tip.show=true;
+        //         diyagui.show=true;
+        //         diyagui_02.show=true;
+        //         polyline_di.show=true;
+        //         di_tip.show=true;
 
-                bianyaqi.show=true;
-                polyline_bian.show=true;
-                bian_tip.show=true;
+        //         bianyaqi.show=true;
+        //         polyline_bian.show=true;
+        //         bian_tip.show=true;
 
-                pdjwaike.show=true;
-                isWatchBoxpdj=true
-        }else{
-                hideAllEntity();
-                pdj_tip.show=true;
-                pdjwaike.show=true;
-                isWatchBoxpdj=false
-        }
+        //         pdjwaike.show=true;
+        //         isWatchBoxpdj=true
+        // }else{
+        //         hideAllEntity();
+        //         pdj_tip.show=true;
+        //         pdjwaike.show=true;
+        //         isWatchBoxpdj=false
+        // }
         }
         
         var zt,zt_tip,ztpdf,ztpdf_tip;
@@ -410,27 +412,27 @@
             zt_tip=viewer.entities.add(labelEntityOptions('308','展厅',114.13846699999996,30.46676929999999,38,'../../SampleData/ChangHua/image/zt.png'));
             ztpdf=viewer.entities.add(createModeEntity('209','../../SampleData/ChangHua/peidian/peidian2.gltf',105,Cesium.Color.YELLOW,114.13846699999996,30.46676929999999,32.2,63))
             ztpdf_tip=viewer.entities.add(labelEntityOptions('309','展厅配电房',114.1384221000001,30.466840399999988, 39,'../../SampleData/ChangHua/image/ztpdf.png'));
-            ztpdf_rise=viewer.entities.add(createModeEntity('ztpdf_rise','../../SampleData/ChangHua/peidian/peidian2.gltf',105,Cesium.Color.YELLOW,114.13846699999996,30.46676929999999,39,63))
-            ztpdf_rise_tip=viewer.entities.add(labelEntityOptions('ztpdf_rise_tip','展厅配电房',114.1384221000001,30.466840399999988, 43,'../../SampleData/ChangHua/image/ztpdf.png'));
-            ztpdg=viewer.entities.add(createModeEntity('ztpdg','../../SampleData/ChangHua/EleDevices/diangui.gltf',105,Cesium.Color.DODGERBLUE,114.13845870000046,30.46678400000016,39.8,63)) ;
-            polyline_ztpdg=viewer.entities.add(createPolyline('polyline_ztpdg',Cesium.Color.BLUE,114.1384221000001,30.466840399999988, 34.7)) ;
+            // ztpdf_rise=viewer.entities.add(createModeEntity('ztpdf_rise','../../SampleData/ChangHua/peidian/peidian2.gltf',105,Cesium.Color.YELLOW,114.13846699999996,30.46676929999999,39,63))
+            // ztpdf_rise_tip=viewer.entities.add(labelEntityOptions('ztpdf_rise_tip','展厅配电房',114.1384221000001,30.466840399999988, 43,'../../SampleData/ChangHua/image/ztpdf.png'));
+            // ztpdg=viewer.entities.add(createModeEntity('ztpdg','../../SampleData/ChangHua/EleDevices/diangui.gltf',105,Cesium.Color.DODGERBLUE,114.13845870000046,30.46678400000016,39.8,63)) ;
+            // polyline_ztpdg=viewer.entities.add(createPolyline('polyline_ztpdg',Cesium.Color.BLUE,114.1384221000001,30.466840399999988, 34.7)) ;
         }
             /*查看展厅配电间结构*/
             function watchZTpdjStructure(){
-                if(isWatchZTpdj==false){
-                    hideAllEntity();
-                    ztpdf.show=true;
-                    ztpdf_rise.show=true;
-                    ztpdf_rise_tip.show=true;
-                    ztpdg.show=true;
-                    polyline_ztpdg.show=true;
-                    isWatchZTpdj=true;
-                }else{
-                    hideAllEntity();
-                    ztpdf.show=true;
-                    ztpdf_tip.show=true;
-                    isWatchZTpdj=false;
-                }
+                // if(isWatchZTpdj==false){
+                //     hideAllEntity();
+                //     ztpdf.show=true;
+                //     ztpdf_rise.show=true;
+                //     ztpdf_rise_tip.show=true;
+                //     ztpdg.show=true;
+                //     polyline_ztpdg.show=true;
+                //     isWatchZTpdj=true;
+                // }else{
+                //     hideAllEntity();
+                //     ztpdf.show=true;
+                //     ztpdf_tip.show=true;
+                //     isWatchZTpdj=false;
+                // }
             }
 
             //昌华围墙
@@ -482,11 +484,6 @@
             nameplate.show=true;
             }
             
-            //去到展厅  跳转界面
-            function  gotoZt(){
-             // 以下方式直接跳转
-             window.location.href='yang.html';
-            }
              
 
             //2.加载所有实体 展厅的  箱式配电间的
@@ -495,40 +492,21 @@
 
             //3.添加到数组
             const allEntityArray=[
-                zt,zt_tip,ztpdf,ztpdf_tip, ztpdg,polyline_ztpdg,ztpdf_rise,ztpdf_rise_tip,
-                pdjwaike,gaoyagui,diyagui,bianyaqi,gaoyagui_02,diyagui_02, polyline_gao,polyline_di,polyline_bian, gao_tip,di_tip,bian_tip,pdj_tip,
+                zt,zt_tip, ztpdf,ztpdf_tip, // ztpdg,polyline_ztpdg,ztpdf_rise,ztpdf_rise_tip,
+                pdjwaike, pdj_tip,  //gaoyagui,diyagui,bianyaqi,gaoyagui_02,diyagui_02, polyline_gao,polyline_di,polyline_bian, gao_tip,di_tip,bian_tip,
                 chwall,nameplate
             ]
 
             //隐藏所有实体
             function hideAllEntity() {
                 //对数组的元素进行操作
-                for (const x in allEntityArray) {
+                for (var x in allEntityArray) {
                     allEntityArray[x].show=false;
                 }
                 //保证每次点击“查看结构”按钮的时候 都能显示出分解的结构
                 isWatchBoxpdj=false
                 isWatchZTpdj=false
             }
-
-            //生产区域显示
-            function productArea(_show)
-            {           
-
-            }
-
-            //配电区域显示
-            function distributElectricArea()
-            {
-
-            }
-
-              //用电区域显示 8  蓝色
-              function useElectricArea()
-              {
-
-              }
- 
 
             //单个区域显示
             function electricArea_Single(_show,_entity,_tipEntity,_clickTipEntity,_isModel,_color,_isView)
@@ -593,7 +571,7 @@
                zt_tip.show=true;
             //  changCameraView(208);
             }
-            
+            // ToZTView()
             //聚焦到展厅配电房
             function ToZTPDFView(){
                 hideAllEntity()
@@ -602,6 +580,7 @@
                 // changCameraView(209);
                
             }
+            // ToZTPDFView()
             //聚焦到配电间
             function ToPDJView(){
                 hideAllEntity()
@@ -610,7 +589,7 @@
                 // changCameraView(204)
                 
             }
-
+            // ToPDJView()
              MyTest(false);
              function MyTest(_show){
                     if(_show==true){
@@ -656,7 +635,7 @@
                     }
                 ]);
                      //按钮
-                Sandcastle.addToolbarButton("展厅配电房结构", function () { 
+                Sandcastle.addToolbarButton("展厅配电间结构", function () { 
                     // removeAllAreaEntities();          
                     watchZTpdjStructure(); 
                 });
@@ -672,12 +651,12 @@
                     TOGardenView()   ;
                 });
                 Sandcastle.addToolbarButton("进入展厅", function () {
-                    gotoZt()
+                
                 });
-                Sandcastle.addToolbarButton("进入展厅配电房", function () {
+                Sandcastle.addToolbarButton("进入展厅配电间", function () {
                     
                 });
-                Sandcastle.addToolbarButton("进入配电间", function () {
+                Sandcastle.addToolbarButton("进入配电房", function () {
                     
                 });
              }
@@ -835,7 +814,7 @@
                  outlineColor : Cesium.Color.WHITE,
                  outlineWidth : 2,
                  disableDepthTestDistance: Number.POSITIVE_INFINITY,  //深度检测关闭
-                 distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 50), //大于50米 小于1米的地方不显示
+                //  distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 50), //大于50米 小于1米的地方不显示
                 //  scaleByDistance: new Cesium.NearFarScalar(50, 1, 120, 0.5),
                 // heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND //相对于地形的位置
                 },
@@ -1679,10 +1658,10 @@
                         break;
                     //查看内部结构
                     case 'watchBoxpdjStruct':
-                        watchBoxpdjStructure();
+                        // watchBoxpdjStructure();
                         break;
                     case 'watchZTpdjStruct':
-                        watchZTpdjStructure();
+                        // watchZTpdjStructure();
                         break;
                     default:
                         break;
@@ -2042,47 +2021,6 @@ var dataSourcePromise=Cesium.CzmlDataSource.load(czml);
 //3.添加
 // viewer.dataSources.add(dataSourcePromise);
 
-        //   const entity =viewer.entities.add(boxEntityOptions('posBox',114.1383482,30.4663846, 18,1,1,1))  ;
-
-    //       function relevantSource() {
-    //         const scene = viewer.scene;
-    //         const camera = viewer.camera;
-    //         //一个实用程序类，用于将自定义地图 图钉生成为画布元素。
-    //         // const pinBuilder = new Cesium.PinBuilder();   
-    //         const position = Cesium.Cartesian3.fromRadians(camera.positionCartographic.longitude, camera.positionCartographic.latitude);
-    //     let dragging = false;
-    //     const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
-    //     handler.setInputAction(
-    //         function(click) {
-    //             const pickedObject = scene.pick(click.position);
-    //             if (Cesium.defined(pickedObject)&&pickedObject.id === entity) {
-    //                 dragging = true;
-                    
-    //             }
-    //         },
-    //         Cesium.ScreenSpaceEventType.LEFT_DOWN
-    //     );
-
-    //     handler.setInputAction(
-    //         function(movement) {
-    //             if (dragging) {
-    //                 entity.position = camera.pickEllipsoid(movement.endPosition);
-    //             }
-    //         },
-    //         Cesium.ScreenSpaceEventType.MOUSE_MOVE
-    //     );
-
-    //     handler.setInputAction(
-    //         function(e) {
-    //             //alert(e.position);
-    //             entity.billboard.scale = 1;
-    //             dragging = false;
-    //         },
-    //         Cesium.ScreenSpaceEventType.LEFT_UP
-    //     );
-    // }
-    // relevantSource();
-
 
             //折线位置点
             const polylineArr=[114.1383623,30.4663526, 19,
@@ -2247,7 +2185,7 @@ var dataSourcePromise=Cesium.CzmlDataSource.load(czml);
     <script src='./menu/js/blooming-menu.min.js'></script>
     <script>
         function homeclick() {
-            window.changhua.home()
+            // window.changhua.home()
         }
 
         function watchZTpdjStruct(){
